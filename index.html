@@ -1,0 +1,1826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Duty Roster System</title>
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+        :root{
+            --bg:#f0f4f8;
+            --card-bg:#ffffff;
+            --text:#1e293b;
+            --text-strong:#0f172a;
+            --text-muted:#64748b;
+            --text-faint:#94a3b8;
+            --border:#e9edf2;
+            --border-strong:#d1d9e6;
+            --controls-bg:#f8fafc;
+            --row-alt:#fafbfc;
+            --row-hover:#f1f5f9;
+            --accent:#4338ca;
+            --accent-hover:#3730a3;
+            --shadow:rgba(0,0,0,0.08);
+            --modal-overlay:rgba(15,23,42,0.5);
+            --header-dark:#0f172a;
+            --subheader-dark:#1e293b;
+        }
+        body.dark-mode{
+            --bg:#0b1220;
+            --card-bg:#141d2e;
+            --text:#dbe4f0;
+            --text-strong:#f1f5f9;
+            --text-muted:#94a3b8;
+            --text-faint:#64748b;
+            --border:#243047;
+            --border-strong:#2e3c57;
+            --controls-bg:#101a2c;
+            --row-alt:#101a2c;
+            --row-hover:#1b2740;
+            --accent:#6366f1;
+            --accent-hover:#818cf8;
+            --shadow:rgba(0,0,0,0.45);
+            --modal-overlay:rgba(2,6,16,0.7);
+            --header-dark:#080d17;
+            --subheader-dark:#0f172a;
+        }
+
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:var(--bg);color:var(--text);padding:20px;transition:background 0.25s,color 0.25s;}
+
+        .container{max-width:1600px;margin:0 auto;background:var(--card-bg);border-radius:20px;box-shadow:0 20px 60px var(--shadow);padding:28px 30px 40px;transition:background 0.25s,box-shadow 0.25s;}
+
+        .header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:20px;border-bottom:2px solid var(--border);}
+        .header-left h1{font-size:26px;font-weight:700;color:var(--text-strong);letter-spacing:-0.3px;}
+        .header-left .subtitle{font-size:12.5px;color:var(--text-muted);font-weight:500;margin-top:2px;}
+        .header-right{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+
+        .icon-btn{width:38px;height:38px;border-radius:10px;border:1.5px solid var(--border-strong);background:var(--card-bg);color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:0.2s;flex-shrink:0;}
+        .icon-btn:hover{background:var(--row-hover);transform:translateY(-1px);}
+
+        .controls{display:flex;flex-wrap:wrap;gap:14px 20px;margin-bottom:24px;padding:16px 20px;background:var(--controls-bg);border-radius:14px;align-items:center;transition:background 0.25s;}
+        .controls label{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;}
+        .controls input[type="text"],.controls input[type="time"], .controls input[type="date"]{padding:6px 12px;border:1.5px solid var(--border-strong);border-radius:8px;font-size:13px;background:var(--card-bg);color:var(--text);transition:0.2s;width:130px;}
+        .controls input:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.15);}
+        .controls .btn{padding:7px 18px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:0.2s;background:#e2e8f0;color:#1e293b;display:inline-block;}
+        .controls .btn-primary{background:#4338ca;color:#fff;}
+        .controls .btn-primary:hover{background:#3730a3;transform:translateY(-1px);}
+        .controls .btn-success{background:#059669;color:#fff;}
+        .controls .btn-success:hover{background:#047857;transform:translateY(-1px);}
+        .controls .btn-outline{background:transparent;border:1.5px solid var(--border-strong);color:var(--text);}
+        .controls .btn-outline:hover{background:var(--row-hover);}
+        .controls .btn-danger{background:#dc2626;color:#fff;}
+        .controls .btn-danger:hover{background:#b91c1c;}
+        .controls .btn-dark{background:#1e293b;color:#fff;}
+        .controls .btn-dark:hover{background:#0f172a;transform:translateY(-1px);}
+
+        /* ===== SEARCH BAR ===== */
+        .search-wrap{position:relative;flex:1 1 220px;max-width:280px;}
+        .search-wrap input{width:100%;padding:7px 12px 7px 30px;border:1.5px solid var(--border-strong);border-radius:8px;font-size:13px;background:var(--card-bg);color:var(--text);}
+        .search-wrap input:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.15);}
+        .search-wrap::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;opacity:0.6;}
+        .search-clear{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-faint);font-size:14px;display:none;}
+        .search-wrap.has-value .search-clear{display:block;}
+
+        /* ===== DASHBOARD STATS ===== */
+        .dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:24px;}
+        .stat-card{background:var(--controls-bg);border:1px solid var(--border);border-radius:14px;padding:14px 16px;transition:0.2s;}
+        .stat-card .stat-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;display:flex;align-items:center;gap:6px;}
+        .stat-card .stat-value{font-size:24px;font-weight:800;color:var(--text-strong);margin-top:4px;}
+        .stat-card.accent-off .stat-value{color:#1e293b;}
+        .stat-card.accent-sick .stat-value{color:#dc2626;}
+        .stat-card.accent-ph .stat-value{color:#1e40af;}
+        .stat-card.accent-working .stat-value{color:#059669;}
+
+        .roster-wrapper{overflow-x:auto;border-radius:14px;border:1px solid var(--border);margin-bottom:20px;max-height:700px;overflow-y:auto;position:relative;}
+        .roster-wrapper table{width:100%;border-collapse:collapse;font-size:13px;min-width:1200px;}
+
+        .roster-wrapper thead{position:sticky;top:0;z-index:20;}
+        .roster-wrapper thead tr:first-child th{background:var(--header-dark);color:#f8fafc;padding:10px 6px;font-weight:600;font-size:12px;text-align:center;letter-spacing:0.3px;}
+        .roster-wrapper thead tr:first-child th:first-child{text-align:left;padding-left:14px;min-width:250px;}
+        .roster-wrapper thead tr:last-child th{background:var(--subheader-dark);color:#cbd5e1;padding:6px 4px;font-weight:500;font-size:12px;text-align:center;}
+        .roster-wrapper thead tr:last-child th:first-child{text-align:left;padding-left:14px;}
+        .roster-wrapper thead th .dow{display:block;font-size:10px;font-weight:400;color:#94a3b8;margin-top:1px;}
+        .roster-wrapper thead th.today-col{background:var(--accent) !important;color:#fff !important;}
+
+        .roster-wrapper tbody tr{transition:background 0.1s;}
+        .roster-wrapper tbody tr:nth-child(even){background:var(--row-alt);}
+        .roster-wrapper tbody tr:hover{background:var(--row-hover);}
+        .roster-wrapper tbody tr.row-hidden{display:none;}
+        .roster-wrapper tbody td{padding:3px 3px;text-align:center;border-bottom:1px solid var(--border);vertical-align:middle;font-size:11px;font-weight:500;transition:0.15s;min-width:54px;height:48px;position:relative;user-select:none;}
+        .roster-wrapper tbody td:first-child{text-align:left;padding-left:14px;font-weight:600;font-size:12.5px;color:var(--text-strong);cursor:default;background:var(--card-bg);position:sticky;left:0;z-index:10;border-right:2px solid var(--border);min-width:170px;}
+        .roster-wrapper tbody tr:nth-child(even) td:first-child{background:var(--row-alt);}
+        .roster-wrapper tbody tr:hover td:first-child{background:var(--row-hover);}
+        .roster-wrapper tbody td.today-col{background:rgba(99,102,241,0.07);}
+
+        /* Admin Mode Pointer */
+        body.is-admin .roster-wrapper tbody td:not(:first-child){cursor:pointer;}
+
+        /* ===== STATUS CELLS ===== */
+        .cell-status{border-radius:6px;font-weight:700;font-size:10px;padding:2px 4px;display:inline-block;min-width:28px;text-align:center;transition:0.15s;line-height:1.3;}
+        .cell-status.working{background:transparent;color:#94a3b8;font-weight:400;}
+        .cell-status.off{background:#1e293b;color:#f8fafc;font-weight:800;letter-spacing:0.5px;}
+        .cell-status.po{background:#fef9c3;color:#854d0e;}
+        .cell-status.ph{background:#dbeafe;color:#1e40af;}
+        .cell-status.sick{background:#fecaca;color:#991b1b;}
+        .cell-status.abp{background:#e0e7ff;color:#3730a3;}
+
+        /* ===== CELL TIME DISPLAY ===== */
+        .cell-time{display:block;font-size:9px;color:#64748b;font-weight:500;margin-top:1px;line-height:1.2;}
+        .cell-time.custom{color:#4338ca;font-weight:700;}
+        .cell-time.off-time{color:#94a3b8;}
+
+        /* ===== MONTH NAVIGATOR ===== */
+        .month-nav{display:flex;align-items:center;gap:6px;position:relative;}
+        .month-nav .icon-btn{width:32px;height:32px;font-size:14px;}
+
+        .month-picker-popup{display:none;position:absolute;top:115%;left:0;background:var(--card-bg);border:1px solid var(--border-strong);border-radius:14px;box-shadow:0 16px 44px var(--shadow);padding:14px;z-index:300;width:230px;}
+        .month-picker-popup.active{display:block;}
+        .month-picker-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-weight:700;font-size:14px;color:var(--text-strong);}
+        .month-picker-header .icon-btn{width:26px;height:26px;font-size:12px;}
+        .month-picker-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+        .month-picker-grid button{padding:9px 4px;border:1.5px solid var(--border-strong);border-radius:8px;background:var(--card-bg);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;transition:0.15s;}
+        .month-picker-grid button:hover{background:var(--row-hover);}
+        .month-picker-grid button.active-month{background:#4338ca;color:#fff;border-color:#4338ca;}
+        .month-picker-grid button.current-month-marker{box-shadow:inset 0 0 0 2px #059669;}
+
+        /* ===== EVENT DOT on roster cells ===== */
+        .event-dot{position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:#4338ca;box-shadow:0 0 0 2px var(--card-bg);}
+        body.dark-mode .event-dot{background:#818cf8;}
+
+        /* ===== OFF COUNTER ===== */
+        .off-counter{font-size:10px;color:var(--text-muted);font-weight:400;margin-left:6px;background:var(--row-hover);padding:0 8px;border-radius:12px;display:inline-block;}
+        .off-warning{color:#dc2626;font-weight:700;}
+        .off-ok{color:#059669;}
+
+        /* ===== LEGEND ===== */
+        .legend{display:flex;flex-wrap:wrap;gap:12px 24px;padding:14px 18px;background:var(--controls-bg);border-radius:12px;margin-bottom:24px;border:1px solid var(--border);}
+        .legend-item{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;}
+        .legend-item .swatch{width:20px;height:20px;border-radius:6px;border:1px solid var(--border-strong);}
+        .legend-item .swatch.working{background:transparent;border-color:var(--border-strong);}
+        .legend-item .swatch.off{background:#1e293b;}
+        .legend-item .swatch.po{background:#fef9c3;}
+        .legend-item .swatch.ph{background:#dbeafe;}
+        .legend-item .swatch.sick{background:#fecaca;}
+        .legend-item .swatch.abp{background:#e0e7ff;}
+
+        /* ===== EVENTS SECTION ===== */
+        .events-section{margin-top:20px;border-top:2px solid var(--border);padding-top:20px;}
+        .events-section h3{font-size:17px;font-weight:700;color:var(--text-strong);margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+        .events-list{display:flex;flex-wrap:wrap;gap:12px;}
+        .event-card{background:var(--controls-bg);border:1px solid var(--border);border-radius:12px;padding:12px 18px;display:flex;flex-direction:column;gap:8px;flex:0 1 auto;min-width:280px;transition:0.15s;position:relative;}
+        .event-card:hover{border-color:#a5b4fc;background:var(--row-hover);}
+        .event-header{display:flex;align-items:center;gap:10px;}
+        .event-card .event-date{font-weight:700;font-size:13px;color:#4338ca;background:#eef2ff;padding:2px 12px;border-radius:20px;white-space:nowrap;}
+        .event-card .event-time-badge{font-weight:600;font-size:11px;color:#059669;background:#d1fae5;padding:2px 8px;border-radius:12px;white-space:nowrap;}
+        .event-card .event-title{font-weight:600;font-size:14px;color:var(--text-strong);}
+        .event-card .event-desc{font-size:12px;color:var(--text-muted);display:block;}
+        .event-card .event-attendees{font-size:12px;color:#3730a3;font-weight:600;margin-top:4px;display:flex;align-items:flex-start;gap:6px;}
+        .event-card .event-del{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:16px;padding:0 4px;transition:0.15s;}
+        .event-card .event-del:hover{color:#dc2626;}
+
+        /* ===== MODALS ===== */
+        .modal-overlay{display:none;position:fixed;inset:0;background:var(--modal-overlay);backdrop-filter:blur(4px);z-index:999;justify-content:center;align-items:center;}
+        .modal-overlay.active{display:flex;}
+        .modal{background:var(--card-bg);border-radius:20px;padding:30px 34px;max-width:520px;width:92%;box-shadow:0 40px 80px rgba(0,0,0,0.2);animation:modalIn 0.25s ease;}
+        @keyframes modalIn{from{opacity:0;transform:scale(0.96) translateY(12px);}to{opacity:1;transform:scale(1) translateY(0);}}
+        .modal h2{font-size:20px;font-weight:700;margin-bottom:18px;color:var(--text-strong);}
+        .modal .field{margin-bottom:14px;}
+        .modal .field label{display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;}
+        .modal .field input[type="text"],.modal .field input[type="password"],.modal .field input[type="date"],.modal .field input[type="time"],.modal .field textarea,.modal .field select{width:100%;padding:8px 14px;border:1.5px solid var(--border-strong);border-radius:10px;font-size:14px;transition:0.2s;font-family:inherit;background:var(--card-bg);color:var(--text);}
+        .modal .field input:focus,.modal .field textarea:focus,.modal .field select:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.12);}
+        .modal .field textarea{resize:vertical;min-height:60px;}
+        .modal .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+        .modal .field-hint{font-size:11.5px;color:var(--text-muted);margin-top:4px;}
+        .modal .modal-actions{display:flex;gap:10px;margin-top:18px;justify-content:flex-end;}
+        .modal .modal-actions .btn{padding:9px 24px;border:none;border-radius:10px;font-weight:600;font-size:14px;cursor:pointer;transition:0.2s;}
+        .modal .modal-actions .btn-secondary{background:#e2e8f0;color:#1e293b;}
+        .modal .modal-actions .btn-secondary:hover{background:#cbd5e1;}
+        .modal .modal-actions .btn-primary{background:#4338ca;color:#fff;}
+        .modal .modal-actions .btn-primary:hover{background:#3730a3;}
+        .modal .modal-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+        .modal .modal-title-row h2{margin-bottom:0;}
+        .modal .lockout-msg{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;margin-bottom:14px;}
+        .modal .login-hint{font-size:11.5px;color:var(--text-faint);margin-top:10px;line-height:1.5;}
+
+        /* Attendees Checklist */
+        .attendees-list {max-height:140px; overflow-y:auto; border:1.5px solid var(--border-strong); border-radius:10px; padding:10px 14px; background:var(--row-alt);}
+        .attendee-item {display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:13px; font-weight:500; color:var(--text); cursor:pointer;}
+        .attendee-item:last-child {margin-bottom:0;}
+        .attendee-item input[type="checkbox"] {width:16px; height:16px; accent-color:#4338ca; cursor:pointer;}
+
+        /* ===== TOAST ===== */
+        .toast-container{position:fixed;bottom:24px;right:24px;z-index:1200;display:flex;flex-direction:column;gap:10px;align-items:flex-end;}
+        .toast{background:var(--header-dark);color:#f8fafc;padding:11px 18px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 12px 30px rgba(0,0,0,0.25);display:flex;align-items:center;gap:8px;animation:toastIn 0.25s ease, toastOut 0.3s ease 2.4s forwards;max-width:320px;}
+        @keyframes toastIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+        @keyframes toastOut{to{opacity:0;transform:translateY(-6px);}}
+        .toast.success{background:#059669;}
+        .toast.error{background:#dc2626;}
+
+        /* ===== CELL POPUP (status + time) ===== */
+        .status-popup{display:none;position:absolute;z-index:200;background:var(--card-bg);border-radius:14px;box-shadow:0 16px 48px var(--shadow);padding:0;min-width:200px;border:1px solid var(--border);top:100%;left:50%;transform:translateX(-50%);overflow:hidden;}
+        .status-popup.active{display:block;}
+        .popup-section-title{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;padding:8px 12px 4px;background:var(--controls-bg);border-bottom:1px solid var(--border);}
+        .popup-status-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;padding:6px 8px;}
+        .status-popup .popup-btn{display:flex;align-items:center;gap:6px;width:100%;padding:5px 8px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;text-align:left;transition:0.1s;background:transparent;margin:2px 0;color:var(--text);}
+        .status-popup .popup-btn:hover{background:var(--row-hover);}
+        .status-popup .popup-btn .badge{display:inline-block;width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+        .status-popup .popup-btn.off .badge{background:#1e293b;}
+        .status-popup .popup-btn.po .badge{background:#fef9c3;border:1px solid #ca8a04;}
+        .status-popup .popup-btn.ph .badge{background:#dbeafe;border:1px solid #3b82f6;}
+        .status-popup .popup-btn.sick .badge{background:#fecaca;border:1px solid #ef4444;}
+        .status-popup .popup-btn.abp .badge{background:#e0e7ff;border:1px solid #6366f1;}
+        .status-popup .popup-btn.clear .badge{background:transparent;border:1.5px dashed #94a3b8;}
+        .popup-divider{border:none;border-top:1px solid var(--border);margin:0;}
+        .popup-time-section{padding:8px 12px 10px;}
+        .popup-time-section .time-label{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+        .popup-time-row{display:flex;align-items:center;gap:6px;font-size:12px;}
+        .popup-time-row input[type="time"]{padding:4px 8px;border:1.5px solid var(--border-strong);border-radius:8px;font-size:12px;background:var(--card-bg);color:var(--text);width:90px;transition:0.2s;}
+        .popup-time-row input[type="time"]:focus{outline:none;border-color:#6366f1;}
+        .popup-time-row span{color:var(--text-faint);font-size:11px;}
+        .popup-time-apply{margin-top:6px;width:100%;padding:5px 0;background:#4338ca;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:0.2s;}
+        .popup-time-apply:hover{background:#3730a3;}
+        .popup-time-clear{margin-top:4px;width:100%;padding:4px 0;background:transparent;color:var(--text-muted);border:1px solid var(--border-strong);border-radius:8px;font-size:11px;cursor:pointer;transition:0.2s;}
+        .popup-time-clear:hover{background:var(--row-hover);color:var(--text);}
+
+        /* ===== WEEK SEPARATOR ===== */
+        .roster-wrapper thead tr:last-child th.week-end{border-right:2px solid #475569;}
+        .roster-wrapper tbody td.week-end{border-right:2px solid var(--border-strong);}
+
+        /* ===== SITE TIME DISPLAY ===== */
+        .site-time-display{font-size:13px;color:var(--text);font-weight:500;background:var(--row-hover);padding:4px 14px;border-radius:20px;display:inline-block;}
+
+        /* ===== SAVE STATUS INDICATOR ===== */
+        .save-indicator{font-size:11.5px;color:var(--text-faint);display:flex;align-items:center;gap:5px;}
+        .save-indicator .dot{width:7px;height:7px;border-radius:50%;background:#10b981;transition:0.2s;}
+        .save-indicator.saving .dot{background:#f59e0b;}
+        .save-indicator.gh-idle .dot{background:#94a3b8;}
+        .save-indicator.gh-syncing .dot{background:#f59e0b;}
+        .save-indicator.gh-synced .dot{background:#10b981;}
+        .save-indicator.gh-error .dot{background:#dc2626;}
+
+        /* ===== ADMIN & VIEW MODE LOGIC ===== */
+        body:not(.is-admin) .admin-only { display: none !important; }
+        body.is-admin #openLoginBtn { display: none !important; }
+
+        /* ===== PRINT-ONLY ELEMENTS (hidden on screen) ===== */
+        .print-only{display:none;}
+
+        /* ===== RESPONSIVE ===== */
+        @media(max-width:768px){
+            .container{padding:16px 12px;}
+            .header{flex-direction:column;align-items:flex-start;gap:10px;}
+            .header-left h1{font-size:20px;}
+            .controls{flex-direction:column;align-items:stretch;}
+            .controls label{flex-wrap:wrap;}
+            .controls input[type="text"],.controls input[type="time"], .controls input[type="date"]{width:100%;}
+            .search-wrap{max-width:100%;}
+            .roster-wrapper tbody td:first-child{min-width:120px;font-size:11px;padding-left:8px;}
+            .roster-wrapper table{font-size:11px;min-width:900px;}
+            .modal .field-row{grid-template-columns:1fr;}
+            .dashboard{grid-template-columns:repeat(auto-fit,minmax(100px,1fr));}
+            .header-right{gap:8px;width:100%;justify-content:flex-start;}
+        }
+        @media(max-width:480px){
+            .container{padding:10px 6px;}
+            .roster-wrapper tbody td:first-child{min-width:90px;font-size:10px;padding-left:4px;}
+            .roster-wrapper table{min-width:700px;font-size:10px;}
+            .toast-container{left:12px;right:12px;bottom:12px;align-items:stretch;}
+            .toast{max-width:100%;}
+        }
+
+       /* ===== PRINT / PDF EXPORT STYLES (A3 Landscape - Uniform Grid) ===== */
+        @media print {
+            @page { 
+                size: A3 landscape; 
+                margin: 16mm; 
+            }
+
+            body, .container { 
+                background: white !important; 
+                color: #0f172a !important;
+                padding: 0 !important; 
+                margin: 0 !important; 
+                box-shadow: none !important; 
+                max-width: 100% !important; 
+                width: 100% !important;
+            }
+
+            .controls, .legend, .status-popup, #resetRoster, #openEventModal, .dashboard, .toast-container, .save-indicator, .theme-toggle, #openSettingsBtn { 
+                display: none !important; 
+            }
+
+            .print-only{display:block !important;}
+
+            .print-header{
+                display:flex !important; justify-content:space-between; align-items:flex-end;
+                border-bottom:2px solid #0f172a; padding-bottom:10px; margin-bottom:14px;
+            }
+            .print-header .print-title{font-size:20px;font-weight:800;color:#0f172a;}
+            .print-header .print-meta{font-size:10px;color:#475569;text-align:right;line-height:1.5;}
+            .print-summary{display:flex !important;gap:18px;margin-bottom:14px;font-size:10px;color:#0f172a;flex-wrap:wrap;}
+            .print-summary span{font-weight:700;}
+            .print-legend{display:flex !important;flex-wrap:wrap;gap:10px 18px;margin-bottom:12px;font-size:9px;color:#1e293b;}
+            .print-legend .swatch{width:10px;height:10px;border:1px solid #94a3b8;display:inline-block;vertical-align:middle;margin-right:4px;}
+            .print-signatures{display:flex !important;justify-content:space-between;margin-top:36px;gap:40px;}
+            .print-signatures .sig-block{flex:1;border-top:1px solid #475569;padding-top:6px;font-size:10px;color:#334155;}
+
+            .roster-wrapper { 
+                max-height: none !important; 
+                overflow: visible !important; 
+                border: none !important; 
+            }
+
+            .roster-wrapper table { 
+                width: 100% !important; 
+                table-layout: fixed !important; /* Forces all columns to be equal width */
+                border-collapse: collapse !important;
+            }
+
+            /* Unifying all cells: Names and Dates now share the same settings */
+            td, th { 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+                border: 1px solid #cbd5e1 !important;
+                font-size: 9px !important; 
+                padding: 4px 2px !important; 
+                text-align: center !important;
+                word-wrap: break-word !important;
+                background:white !important;
+                color:#0f172a !important;
+            }
+
+            /* Specific adjustment to ensure names aren't squashed */
+            .roster-wrapper tbody td:first-child,
+            .roster-wrapper thead th:first-child {
+                text-align: left !important;
+                padding-left: 6px !important;
+            }
+
+            .roster-wrapper thead tr:first-child th, .roster-wrapper thead tr:last-child th{
+                background:#1e293b !important; color:#fff !important;
+            }
+
+            .header { display:none !important; }
+
+            .events-section { display: block !important; margin-top: 30px; }
+            .event-card { break-inside: avoid; border: 1px solid #e9edf2; margin-bottom: 10px; padding: 10px; background:white !important; }
+            .event-del { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app">
+
+    <!-- Print-only header, shown only when printing -->
+    <div class="print-header print-only">
+        <div class="print-title">📋 Duty Roster</div>
+        <div class="print-meta">
+            Period: <span id="printPeriod">—</span><br/>
+            Generated: <span id="printGenerated">—</span>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="header-left">
+            <h1>📋 Duty Roster</h1>
+            <div class="subtitle" id="periodSubtitle"></div>
+        </div>
+        <div class="header-right">
+            <span class="save-indicator" id="saveIndicator"><span class="dot"></span> Saved locally</span>
+            <span class="save-indicator" id="githubStatus" style="cursor:pointer;" title="Click to configure GitHub sync"><span class="dot"></span> GitHub: not set up</span>
+            <span class="site-time-display" id="siteTimeDisplay">⏰ 08:00 – 17:00</span>
+            <button class="icon-btn theme-toggle" id="themeToggleBtn" title="Toggle dark mode">🌙</button>
+            <button class="icon-btn admin-only" id="openGithubBtn" title="GitHub sync settings">🐙</button>
+            <button class="icon-btn admin-only" id="openSettingsBtn" title="Admin settings">⚙️</button>
+            <button class="btn btn-primary" id="openLoginBtn">Admin Login</button>
+            <button class="btn btn-outline admin-only" id="logoutBtn">Logout Admin</button>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="admin-only" style="display:flex; flex-wrap:wrap; gap:14px 20px; width:100%; margin-bottom:12px; align-items:center;">
+            <div class="month-nav">
+                <button class="icon-btn" id="prevMonthBtn" title="Previous month">◀</button>
+                <button class="btn btn-outline" id="monthPickerBtn">📅 <span id="monthPickerLabel">—</span></button>
+                <button class="icon-btn" id="nextMonthBtn" title="Next month">▶</button>
+                <button class="btn btn-outline" id="goCurrentMonthBtn">This Month</button>
+
+                <div class="month-picker-popup" id="monthPickerPopup">
+                    <div class="month-picker-header">
+                        <button class="icon-btn" id="pickerPrevYear" title="Previous year">◀</button>
+                        <span id="pickerYearLabel">2026</span>
+                        <button class="icon-btn" id="pickerNextYear" title="Next year">▶</button>
+                    </div>
+                    <div class="month-picker-grid" id="monthPickerGrid"></div>
+                </div>
+            </div>
+
+            <button class="btn btn-outline" id="toggleCustomRangeBtn">📅 Custom Range</button>
+            <label id="customRangeRow" style="display:none;">
+                <input type="date" id="calendarStart" />
+                —
+                <input type="date" id="calendarEnd" />
+                <button class="btn btn-primary" id="applyCalendarRange">Set Date</button>
+            </label>
+
+            <label>
+                ⏱️ Site Time:
+                <input type="time" id="siteStart" value="08:00" />
+                —
+                <input type="time" id="siteEnd" value="17:00" />
+                <button class="btn btn-primary" id="applySiteTime">Apply</button>
+            </label>
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; gap:14px; width:100%; align-items:center;">
+            <div class="search-wrap" id="searchWrap">
+                <input type="text" id="memberSearch" placeholder="Search staff name…" />
+                <button class="search-clear" id="searchClear" title="Clear search">✕</button>
+            </div>
+            <button class="btn btn-success admin-only" id="openEventModal">➕ Add Event</button>
+            <button class="btn btn-outline admin-only" id="resetRoster">🔄 Reset All</button>
+            <button class="btn btn-dark admin-only" id="saveDataBtn">💾 Save Roster File</button>
+            
+            <label class="btn btn-dark admin-only" style="margin:0; font-weight:600; display:flex; align-items:center; cursor:pointer;">
+                📂 Load Roster File
+                <input type="file" id="loadDataInput" accept=".json" style="display:none;" />
+            </label>
+
+            <button class="btn btn-outline" id="exportCSV">📥 Export CSV</button>
+            <button class="btn btn-outline" id="exportPDF">📄 Export PDF</button>
+        </div>
+    </div>
+
+    <div class="dashboard" id="dashboard"></div>
+
+    <div class="legend">
+        <span class="legend-item"><span class="swatch working"></span> Working</span>
+        <span class="legend-item"><span class="swatch off"></span> OFF · Day Off</span>
+        <span class="legend-item"><span class="swatch po"></span> PO · Pending Off</span>
+        <span class="legend-item"><span class="swatch ph"></span> PH · Public Holiday</span>
+        <span class="legend-item"><span class="swatch sick"></span> SICK · Sick Leave</span>
+        <span class="legend-item"><span class="swatch abp"></span> ABP · Absent w/ Permission</span>
+        <span style="font-size:12px;color:var(--text-muted);margin-left:auto;">⚡ 1 off per week required</span>
+    </div>
+
+    <!-- Print-only summary + legend -->
+    <div class="print-summary print-only" id="printSummary"></div>
+    <div class="print-legend print-only">
+        <span><span class="swatch" style="background:transparent;"></span>Working</span>
+        <span><span class="swatch" style="background:#1e293b;"></span>OFF</span>
+        <span><span class="swatch" style="background:#fef9c3;"></span>PO</span>
+        <span><span class="swatch" style="background:#dbeafe;"></span>PH</span>
+        <span><span class="swatch" style="background:#fecaca;"></span>SICK</span>
+        <span><span class="swatch" style="background:#e0e7ff;"></span>ABP</span>
+    </div>
+
+    <div class="roster-wrapper" id="rosterWrapper">
+        <table id="rosterTable">
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="events-section">
+        <h3>📌 Events & Conferences <span style="font-size:13px;font-weight:400;color:var(--text-muted);" id="eventCount">(0)</span></h3>
+        <div class="events-list" id="eventsList">
+            <div style="color:var(--text-faint);font-size:14px;padding:8px 0;">No events scheduled yet.</div>
+        </div>
+    </div>
+
+    <!-- Print-only sign-off block -->
+    <div class="print-signatures print-only">
+        <div class="sig-block">Prepared by: ______________________</div>
+        <div class="sig-block">Approved by: ______________________</div>
+        <div class="sig-block">Date: ______________________</div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="eventModal">
+    <div class="modal">
+        <div class="modal-title-row">
+            <h2>📌 Add Event / Conference</h2>
+        </div>
+        <div class="field">
+            <label>Event Title *</label>
+            <input type="text" id="eventTitle" placeholder="e.g. System Integration Conference, Site Meeting" />
+        </div>
+        <div class="field-row">
+            <div class="field">
+                <label>Date *</label>
+                <input type="date" id="eventDate" />
+            </div>
+            <div class="field">
+                <label>Category</label>
+                <select id="eventCategory">
+                    <option value="general">📋 General</option>
+                    <option value="meeting">🤝 Meeting</option>
+                    <option value="training">📚 Training</option>
+                    <option value="conference">🌍 Conference</option>
+                    <option value="site">🏗️ Site Event</option>
+                    <option value="holiday">🎉 Holiday</option>
+                </select>
+            </div>
+        </div>
+        <div class="field-row">
+            <div class="field">
+                <label>Start Time (optional)</label>
+                <input type="time" id="eventStartTime" />
+            </div>
+            <div class="field">
+                <label>End Time (optional)</label>
+                <input type="time" id="eventEndTime" />
+            </div>
+        </div>
+        
+        <div class="field">
+            <label>Assign Attendees</label>
+            <div class="attendees-list" id="modalAttendeesList">
+                </div>
+        </div>
+
+        <div class="field">
+            <label>Description (optional)</label>
+            <textarea id="eventDesc" placeholder="Details, location, or notes about the event..."></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" id="closeEventModal">Cancel</button>
+            <button class="btn btn-primary" id="saveEvent">Save Event</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="loginModal">
+    <div class="modal" style="max-width: 400px;">
+        <div class="modal-title-row">
+            <h2>🔒 Admin Login</h2>
+        </div>
+        <div class="lockout-msg" id="lockoutMsg" style="display:none;"></div>
+        <div class="field">
+            <label>Username</label>
+            <input type="text" id="loginUser" placeholder="Enter username" />
+        </div>
+        <div class="field">
+            <label>Password</label>
+            <input type="password" id="loginPass" placeholder="Enter password" />
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" id="closeLoginModal">Cancel</button>
+            <button class="btn btn-primary" id="submitLogin">Login</button>
+        </div>
+        <div class="login-hint">Default: Admin / Admin@123 — change this from ⚙️ Settings after logging in. Note: since this app runs entirely in your browser, this login deters casual editing but isn't a substitute for real server-side security.</div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal" style="max-width: 440px;">
+        <div class="modal-title-row">
+            <h2>⚙️ Admin Settings</h2>
+        </div>
+        <div class="field">
+            <label>Username</label>
+            <input type="text" id="settingsUser" placeholder="Admin username" />
+        </div>
+        <div class="field">
+            <label>New Password <span style="color:var(--text-faint);font-weight:400;">(leave blank to keep current)</span></label>
+            <input type="password" id="settingsNewPass" placeholder="New password" />
+        </div>
+        <div class="field">
+            <label>Confirm New Password</label>
+            <input type="password" id="settingsConfirmPass" placeholder="Confirm new password" />
+        </div>
+        <div class="field-hint" id="settingsHint"></div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" id="closeSettingsModal">Cancel</button>
+            <button class="btn btn-primary" id="saveSettings">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="githubModal">
+    <div class="modal" style="max-width: 480px;">
+        <div class="modal-title-row">
+            <h2>🐙 GitHub Sync</h2>
+        </div>
+        <div class="field-hint" style="margin-bottom:14px;">
+            Stores a backup of this roster as a JSON file in a GitHub repo, so it's not stuck on just this one device/browser. Use a <strong>fine-grained Personal Access Token</strong> scoped only to this one repository with <em>Contents: Read & Write</em> permission. The token is stored only in this browser's local storage and sent only to api.github.com — never anywhere else.
+        </div>
+        <div class="field">
+            <label>Personal Access Token</label>
+            <input type="password" id="ghToken" placeholder="github_pat_..." />
+        </div>
+        <div class="field-row">
+            <div class="field">
+                <label>Repo Owner</label>
+                <input type="text" id="ghOwner" placeholder="e.g. stephen-uganda" />
+            </div>
+            <div class="field">
+                <label>Repo Name</label>
+                <input type="text" id="ghRepo" placeholder="e.g. duty-roster" />
+            </div>
+        </div>
+        <div class="field-row">
+            <div class="field">
+                <label>File Path</label>
+                <input type="text" id="ghPath" placeholder="duty-roster-data.json" />
+            </div>
+            <div class="field">
+                <label>Branch</label>
+                <input type="text" id="ghBranch" placeholder="main" />
+            </div>
+        </div>
+        <div class="field" style="margin-bottom:6px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="ghAutoSync" style="width:16px;height:16px;accent-color:#4338ca;" />
+                Auto-push changes to GitHub (a few seconds after each edit)
+            </label>
+        </div>
+        <div class="field-hint" id="ghHint"></div>
+        <div class="modal-actions" style="justify-content:space-between;">
+            <button class="btn btn-secondary" id="ghDisconnect" style="background:#fef2f2;color:#991b1b;">Disconnect</button>
+            <div style="display:flex;gap:10px;">
+                <button class="btn btn-secondary" id="ghPullNow">⬇️ Pull Now</button>
+                <button class="btn btn-secondary" id="ghPushNow">⬆️ Push Now</button>
+                <button class="btn btn-primary" id="ghSaveSettings">Save</button>
+            </div>
+        </div>
+        <div class="modal-actions" style="justify-content:flex-end;margin-top:6px;">
+            <button class="btn btn-secondary" id="closeGithubModal">Close</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ============================================================
+//  DATA & STATE
+// ============================================================
+
+let isAdmin = false; // By default, system is in View Mode
+
+const MEMBERS = [
+    "GALABUZI JOSEPH",
+    "MUBIRU ABDUL HAKIM",
+    "ATWINE SCOTT",
+    "KATENDE MOSES",
+    "NDAWULA DERRICK",
+    "BOGERE ALEX",
+    "BHIMJI MAVJI BHUDHIYA",
+    "ODONGO STEPHEN",
+    "NGIRABAKAUNZI ALEX",
+    "VINCENT KALIBBALA"
+];
+
+let START_DATE = new Date(new Date().getFullYear(), new Date().getMonth(), 1); // 1st of current month
+let END_DATE   = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0); // last day of current month
+
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+// Statuses: '' = working, 'off' = OFF day, 'po', 'ph', 'sick', 'abp'
+const STATUSES = ['off','po','ph','sick','abp'];
+const STATUS_LABELS = { off:'OFF', po:'PO', ph:'PH', sick:'SICK', abp:'ABP' };
+
+let roster   = {};   
+let cellTime = {};   
+let events   = [];
+let eventIdCounter = 0;
+
+let globalSiteStart = '08:00';
+let globalSiteEnd   = '17:00';
+
+// ---- Enhancement state ----
+const STORAGE_KEY = 'dutyRoster_data_v1';
+const AUTH_KEY     = 'dutyRoster_auth_v1';
+const THEME_KEY    = 'dutyRoster_theme_v1';
+const DEFAULT_AUTH_HASH = 'e86f78a8a3caf0b60d8e74e5942aa6d86dc150cd3c03338aef25b7d2d7e3acc7'; // sha256("Admin@123")
+const LOCKOUT_MS = 30000;
+const MAX_ATTEMPTS = 5;
+
+let adminAuth = { username: 'Admin', passHash: DEFAULT_AUTH_HASH };
+let failedAttempts = 0;
+let lockoutUntil = 0;
+let isDarkMode = false;
+let memberSearchTerm = '';
+let lockoutTimer = null;
+
+// ---- Crypto helper ----
+async function sha256(text) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// ---- Toasts ----
+function showToast(msg, type) {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    const el = document.createElement('div');
+    el.className = 'toast' + (type ? ' ' + type : '');
+    el.textContent = msg;
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 2800);
+}
+
+// ---- LocalStorage persistence ----
+function saveToStorage() {
+    try {
+        const indicator = document.getElementById('saveIndicator');
+        if (indicator) indicator.classList.add('saving');
+        const data = {
+            startDate: START_DATE.toISOString(),
+            endDate: END_DATE.toISOString(),
+            roster, cellTime, events, eventIdCounter,
+            globalSiteStart, globalSiteEnd
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        if (indicator) setTimeout(() => indicator.classList.remove('saving'), 250);
+        scheduleGithubAutoPush();
+    } catch (err) {
+        console.error('Auto-save failed:', err);
+    }
+}
+function loadFromStorageRaw() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (err) {
+        console.error('Failed to read saved roster:', err);
+        return null;
+    }
+}
+function applyLoadedState(data) {
+    START_DATE = new Date(data.startDate);
+    END_DATE   = new Date(data.endDate);
+    roster     = data.roster || {};
+    cellTime   = data.cellTime || {};
+    events     = data.events || [];
+    eventIdCounter   = data.eventIdCounter || 0;
+    globalSiteStart  = data.globalSiteStart || '08:00';
+    globalSiteEnd    = data.globalSiteEnd || '17:00';
+    document.getElementById('siteStart').value = globalSiteStart;
+    document.getElementById('siteEnd').value   = globalSiteEnd;
+}
+
+// ============================================================
+//  GITHUB SYNC
+// ============================================================
+const GH_CONFIG_KEY = 'dutyRoster_gh_config_v1';
+const GH_TOKEN_KEY  = 'dutyRoster_gh_token_v1';
+
+let githubConfig = { owner: '', repo: '', path: 'duty-roster-data.json', branch: 'main', autoSync: true };
+let githubToken  = '';
+let githubPushTimer = null;
+
+function githubConfigured() {
+    return !!(githubToken && githubConfig.owner && githubConfig.repo && githubConfig.path && githubConfig.branch);
+}
+function loadGithubConfig() {
+    try {
+        const raw = localStorage.getItem(GH_CONFIG_KEY);
+        if (raw) githubConfig = Object.assign(githubConfig, JSON.parse(raw));
+        githubToken = localStorage.getItem(GH_TOKEN_KEY) || '';
+    } catch (err) { console.error('Failed to load GitHub config:', err); }
+}
+function saveGithubConfig() {
+    try {
+        localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(githubConfig));
+        if (githubToken) localStorage.setItem(GH_TOKEN_KEY, githubToken);
+    } catch (err) { console.error('Failed to save GitHub config:', err); }
+}
+function clearGithubConfig() {
+    githubConfig = { owner: '', repo: '', path: 'duty-roster-data.json', branch: 'main', autoSync: true };
+    githubToken = '';
+    try {
+        localStorage.removeItem(GH_CONFIG_KEY);
+        localStorage.removeItem(GH_TOKEN_KEY);
+    } catch (err) { /* ignore */ }
+}
+
+function setGithubStatus(status, text) {
+    const el = document.getElementById('githubStatus');
+    if (!el) return;
+    el.className = 'save-indicator gh-' + status;
+    el.innerHTML = `<span class="dot"></span> ${text}`;
+}
+function updateGithubStatusUI() {
+    if (!githubConfigured()) { setGithubStatus('idle', 'GitHub: not set up'); return; }
+    setGithubStatus('synced', `GitHub: ${githubConfig.owner}/${githubConfig.repo}`);
+}
+
+// UTF-8 safe base64 helpers (GitHub Contents API requires base64 content)
+function utf8ToBase64(str) {
+    const bytes = new TextEncoder().encode(str);
+    let binary = '';
+    bytes.forEach(b => binary += String.fromCharCode(b));
+    return btoa(binary);
+}
+function base64ToUtf8(b64) {
+    const binary = atob(b64.replace(/\n/g, ''));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+}
+
+function githubApiUrl() {
+    const c = githubConfig;
+    return `https://api.github.com/repos/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}/contents/${c.path.split('/').map(encodeURIComponent).join('/')}`;
+}
+
+async function githubFetchFile() {
+    const url = `${githubApiUrl()}?ref=${encodeURIComponent(githubConfig.branch)}`;
+    const res = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${githubToken}`, 'Accept': 'application/vnd.github+json' }
+    });
+    if (res.status === 404) return null;
+    if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.message || `GitHub error ${res.status}`);
+    }
+    return await res.json(); // { sha, content (base64), ... }
+}
+
+async function githubPush(silent) {
+    if (!githubConfigured()) { if (!silent) showToast('Set up GitHub sync first (🐙 button)', 'error'); return; }
+    setGithubStatus('syncing', 'GitHub: syncing…');
+    try {
+        const existing = await githubFetchFile();
+        const data = {
+            startDate: START_DATE.toISOString(),
+            endDate: END_DATE.toISOString(),
+            roster, cellTime, events, eventIdCounter,
+            globalSiteStart, globalSiteEnd,
+            _syncedAt: new Date().toISOString()
+        };
+        const body = {
+            message: `Duty roster update — ${new Date().toLocaleString('en-GB')}`,
+            content: utf8ToBase64(JSON.stringify(data, null, 2)),
+            branch: githubConfig.branch
+        };
+        if (existing && existing.sha) body.sha = existing.sha;
+
+        const res = await fetch(githubApiUrl(), {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${githubToken}`,
+                'Accept': 'application/vnd.github+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+            const errBody = await res.json().catch(() => ({}));
+            throw new Error(errBody.message || `Push failed (${res.status})`);
+        }
+        updateGithubStatusUI();
+        if (!silent) showToast('Pushed to GitHub', 'success');
+    } catch (err) {
+        console.error('GitHub push error:', err);
+        setGithubStatus('error', 'GitHub: push failed');
+        if (!silent) showToast(`GitHub push failed: ${err.message}`, 'error');
+    }
+}
+
+async function githubPull() {
+    if (!githubConfigured()) { showToast('Set up GitHub sync first (🐙 button)', 'error'); return; }
+    setGithubStatus('syncing', 'GitHub: pulling…');
+    try {
+        const existing = await githubFetchFile();
+        if (!existing) {
+            setGithubStatus('error', 'GitHub: no file yet');
+            showToast('No file found in that repo/path yet — push first.', 'error');
+            return;
+        }
+        const data = JSON.parse(base64ToUtf8(existing.content));
+        applyLoadedState(data);
+        render();
+        updateGithubStatusUI();
+        showToast('Pulled latest roster from GitHub', 'success');
+    } catch (err) {
+        console.error('GitHub pull error:', err);
+        setGithubStatus('error', 'GitHub: pull failed');
+        showToast(`GitHub pull failed: ${err.message}`, 'error');
+    }
+}
+
+function scheduleGithubAutoPush() {
+    if (!githubConfigured() || !githubConfig.autoSync) return;
+    clearTimeout(githubPushTimer);
+    githubPushTimer = setTimeout(() => githubPush(true), 4000);
+}
+
+function saveAuthToStorage() {
+    try {
+        localStorage.setItem(AUTH_KEY, JSON.stringify({ adminAuth, failedAttempts, lockoutUntil }));
+    } catch (err) { console.error('Failed to save auth:', err); }
+}
+function loadAuthFromStorage() {
+    try {
+        const raw = localStorage.getItem(AUTH_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (data.adminAuth && data.adminAuth.username && data.adminAuth.passHash) {
+            adminAuth = data.adminAuth;
+        }
+        failedAttempts = data.failedAttempts || 0;
+        lockoutUntil    = data.lockoutUntil || 0;
+    } catch (err) { console.error('Failed to load auth:', err); }
+}
+
+function applyTheme() {
+    document.body.classList.toggle('dark-mode', isDarkMode);
+    const btn = document.getElementById('themeToggleBtn');
+    if (btn) btn.textContent = isDarkMode ? '☀️' : '🌙';
+}
+function loadThemeFromStorage() {
+    try {
+        isDarkMode = localStorage.getItem(THEME_KEY) === 'dark';
+    } catch (err) { /* ignore */ }
+    applyTheme();
+}
+function saveThemeToStorage() {
+    try { localStorage.setItem(THEME_KEY, isDarkMode ? 'dark' : 'light'); } catch (err) { /* ignore */ }
+}
+
+// ---- Date helpers ----
+function formatDateKey(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function dateFromKey(key) {
+    const [y,m,d] = key.split('-').map(Number);
+    return new Date(y, m-1, d);
+}
+function getDaysArray() {
+    const days = [];
+    let d = new Date(START_DATE);
+    while (d <= END_DATE) { days.push(new Date(d)); d.setDate(d.getDate()+1); }
+    return days;
+}
+function getWeekNumber(date) {
+    return Math.floor((date - START_DATE) / (7*24*60*60*1000)) + 1;
+}
+
+// ---- Init & Ensure State ----
+function initRoster() {
+    MEMBERS.forEach((_,idx) => {
+        roster[idx]   = {};
+        cellTime[idx] = {};
+    });
+    ensureStateForCurrentDates();
+
+    // Populate Attendees Checklist in Modal
+    const attendeesListContainer = document.getElementById('modalAttendeesList');
+    attendeesListContainer.innerHTML = MEMBERS.map((m, i) => `
+        <label class="attendee-item">
+            <input type="checkbox" class="attendee-cb" value="${i}" /> ${m}
+        </label>
+    `).join('');
+}
+
+function ensureStateForCurrentDates() {
+    const days = getDaysArray();
+    MEMBERS.forEach((_,idx) => {
+        days.forEach(d => {
+            const k = formatDateKey(d);
+            if (typeof roster[idx][k] === 'undefined') roster[idx][k] = '';
+            if (typeof cellTime[idx][k] === 'undefined') cellTime[idx][k] = null;
+        });
+    });
+}
+
+function updateHeaderDates() {
+    document.getElementById('calendarStart').value = formatDateKey(START_DATE);
+    document.getElementById('calendarEnd').value = formatDateKey(END_DATE);
+    const label = document.getElementById('monthPickerLabel');
+    if (label) label.textContent = `${MONTH_NAMES[START_DATE.getMonth()]} ${START_DATE.getFullYear()}`;
+}
+
+// ---- Off counts ----
+function getOffCounts() {
+    const days = getDaysArray();
+    const result = {};
+    MEMBERS.forEach((_,idx) => { result[idx] = {}; });
+    days.forEach(d => {
+        const wk  = getWeekNumber(d);
+        const key = formatDateKey(d);
+        MEMBERS.forEach((_,idx) => {
+            if (!result[idx][wk]) result[idx][wk] = 0;
+            if (roster[idx][key] && roster[idx][key] !== '') result[idx][wk]++;
+        });
+    });
+    return result;
+}
+
+function getCellTimeDisplay(memberIdx, dateKey) {
+    const ct = cellTime[memberIdx][dateKey];
+    if (ct && ct.start && ct.end) return `${ct.start}–${ct.end}`;
+    return `${globalSiteStart}–${globalSiteEnd}`;
+}
+function hasCellTime(memberIdx, dateKey) {
+    const ct = cellTime[memberIdx][dateKey];
+    return ct && ct.start && ct.end;
+}
+
+// ============================================================
+//  RENDER
+// ============================================================
+function render() {
+    ensureStateForCurrentDates();
+    updateHeaderDates();
+
+    const days    = getDaysArray();
+    const dateKeys = days.map(d => formatDateKey(d));
+    const offCounts = getOffCounts();
+    const todayKey = formatDateKey(new Date());
+
+    // ---- Table head ----
+    const thead = document.getElementById('tableHead');
+    let headHtml = `<tr><th rowspan="2">Member</th>`;
+    days.forEach(d => {
+        let cls = d.getDay()===6 ? 'week-end' : '';
+        if (formatDateKey(d) === todayKey) cls += ' today-col';
+        headHtml += `<th class="${cls}">${d.getDate()}<span class="dow">${DAY_NAMES[d.getDay()]}</span></th>`;
+    });
+    headHtml += `</tr><tr>`;
+    days.forEach(d => {
+        let cls = d.getDay()===6 ? 'week-end' : '';
+        if (formatDateKey(d) === todayKey) cls += ' today-col';
+        headHtml += `<th class="${cls}">${DAY_NAMES[d.getDay()]}</th>`;
+    });
+    headHtml += `</tr>`;
+    thead.innerHTML = headHtml;
+
+    // ---- Table body ----
+    const tbody = document.getElementById('tableBody');
+    let bodyHtml = '';
+    const searchTerm = memberSearchTerm.trim().toLowerCase();
+
+    // Map "memberIdx_dateKey" -> array of event titles, for showing event-dots on the grid
+    const eventsByCell = {};
+    events.forEach(ev => {
+        (ev.attendees || []).forEach(memberIdx => {
+            const k = `${memberIdx}_${ev.date}`;
+            if (!eventsByCell[k]) eventsByCell[k] = [];
+            eventsByCell[k].push(ev.title);
+        });
+    });
+
+    MEMBERS.forEach((name, idx) => {
+        const rowOff = offCounts[idx] || {};
+        let totalOff = Object.values(rowOff).reduce((a,b)=>a+b,0);
+        const warn = (totalOff < 4 || totalOff > 5) ? 'off-warning' : 'off-ok';
+        const matches = !searchTerm || name.toLowerCase().includes(searchTerm);
+        bodyHtml += `<tr class="${matches ? '' : 'row-hidden'}">`;
+        bodyHtml += `<td>${name} <span class="off-counter ${warn}">${totalOff} off</span></td>`;
+
+        dateKeys.forEach((dk, i) => {
+            const status    = roster[idx][dk] || '';
+            const isWeekEnd = days[i].getDay()===6;
+            const isToday   = dk === todayKey;
+            let cls         = isWeekEnd ? 'week-end' : '';
+            if (isToday) cls += ' today-col';
+            const display   = status ? (STATUS_LABELS[status] || status) : '—';
+            const colorClass= status || 'working';
+            const isOff     = status === 'off';
+
+            const timeStr = getCellTimeDisplay(idx, dk);
+            const isCustomTime = hasCellTime(idx, dk);
+            const timeCls = isOff ? 'off-time' : (isCustomTime ? 'custom' : '');
+            const cellEvents = eventsByCell[`${idx}_${dk}`];
+            const eventDot = cellEvents ? `<span class="event-dot" title="📌 ${escHtml(cellEvents.join(', '))}"></span>` : '';
+
+            bodyHtml += `<td class="${cls}" data-member="${idx}" data-date="${dk}">
+                <div class="cell-wrapper">
+                    ${eventDot}
+                    <div>
+                        <span class="cell-status ${colorClass}">${display}</span>
+                        <span class="cell-time ${timeCls}">${isOff ? '—' : timeStr}</span>
+                    </div>
+                    <div class="status-popup" data-member="${idx}" data-date="${dk}">
+                        <div class="popup-section-title">Status</div>
+                        <div class="popup-status-grid">
+                            <button class="popup-btn off" data-status="off"><span class="badge"></span>OFF</button>
+                            <button class="popup-btn po" data-status="po"><span class="badge"></span>PO</button>
+                            <button class="popup-btn ph" data-status="ph"><span class="badge"></span>PH</button>
+                            <button class="popup-btn sick" data-status="sick"><span class="badge"></span>SICK</button>
+                            <button class="popup-btn abp" data-status="abp"><span class="badge"></span>ABP</button>
+                            <button class="popup-btn clear" data-status=""><span class="badge"></span>Working</button>
+                        </div>
+                        <hr class="popup-divider"/>
+                        <div class="popup-time-section">
+                            <div class="time-label">⏱️ Override Time</div>
+                            <div class="popup-time-row">
+                                <input type="time" class="time-start" value="${cellTime[idx][dk]?.start || globalSiteStart}" />
+                                <span>to</span>
+                                <input type="time" class="time-end" value="${cellTime[idx][dk]?.end || globalSiteEnd}" />
+                            </div>
+                            <button class="popup-time-apply">Apply Time</button>
+                            <button class="popup-time-clear">Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </td>`;
+        });
+        bodyHtml += `</tr>`;
+    });
+    tbody.innerHTML = bodyHtml;
+
+    // ---- Events ----
+    document.getElementById('eventCount').textContent = `(${events.length})`;
+    renderEvents();
+
+    // ---- Header Info ----
+    document.getElementById('siteTimeDisplay').textContent = `⏰ ${globalSiteStart} – ${globalSiteEnd}`;
+    const periodLabel = `${days[0].toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})} – ${days[days.length-1].toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}`;
+    document.getElementById('periodSubtitle').textContent = periodLabel;
+    document.title = `Duty Roster - ${periodLabel}`;
+    document.getElementById('printPeriod').textContent = periodLabel;
+    document.getElementById('printGenerated').textContent = new Date().toLocaleString('en-GB');
+
+    renderDashboard(days, dateKeys, todayKey);
+    attachCellListeners();
+    saveToStorage();
+}
+
+// ---- Dashboard stats ----
+function renderDashboard(days, dateKeys, todayKey) {
+    const dash = document.getElementById('dashboard');
+    if (!dash) return;
+    const total = MEMBERS.length;
+    const todayInRange = dateKeys.includes(todayKey);
+
+    let working=0, off=0, sick=0, onLeave=0; // onLeave = ph+po+abp
+    if (todayInRange) {
+        MEMBERS.forEach((_, idx) => {
+            const status = roster[idx][todayKey] || '';
+            if (status === '') working++;
+            else if (status === 'off') off++;
+            else if (status === 'sick') sick++;
+            else onLeave++;
+        });
+    }
+
+    let totalOffPeriod = 0, totalSickPeriod = 0;
+    MEMBERS.forEach((_, idx) => {
+        dateKeys.forEach(dk => {
+            const s = roster[idx][dk];
+            if (s === 'off') totalOffPeriod++;
+            if (s === 'sick') totalSickPeriod++;
+        });
+    });
+
+    dash.innerHTML = `
+        <div class="stat-card"><div class="stat-label">👥 Total Staff</div><div class="stat-value">${total}</div></div>
+        <div class="stat-card accent-working"><div class="stat-label">✅ Working Today</div><div class="stat-value">${todayInRange ? working : '—'}</div></div>
+        <div class="stat-card accent-off"><div class="stat-label">🛌 Off Today</div><div class="stat-value">${todayInRange ? off : '—'}</div></div>
+        <div class="stat-card accent-sick"><div class="stat-label">🤒 Sick Today</div><div class="stat-value">${todayInRange ? sick : '—'}</div></div>
+        <div class="stat-card accent-ph"><div class="stat-label">📋 On Leave Today</div><div class="stat-value">${todayInRange ? onLeave : '—'}</div></div>
+        <div class="stat-card"><div class="stat-label">📌 Events This Period</div><div class="stat-value">${events.filter(e => dateKeys.includes(e.date)).length}</div></div>
+    `;
+
+    const printSummary = document.getElementById('printSummary');
+    if (printSummary) {
+        printSummary.innerHTML = `<span>Total Staff: ${total}</span><span>Total OFF-days: ${totalOffPeriod}</span><span>Total SICK-days: ${totalSickPeriod}</span><span>Events: ${events.filter(e => dateKeys.includes(e.date)).length}</span>`;
+    }
+}
+
+// ---- Render events ----
+const CATEGORY_ICONS = { general:'📋', meeting:'🤝', training:'📚', conference:'🌍', site:'🏗️', holiday:'🎉' };
+function renderEvents() {
+    const container = document.getElementById('eventsList');
+    const visibleEvents = events.filter(e => {
+        const evDate = dateFromKey(e.date);
+        return evDate >= START_DATE && evDate <= END_DATE;
+    });
+
+    if (visibleEvents.length === 0) {
+        container.innerHTML = `<div style="color:#94a3b8;font-size:14px;padding:8px 0;">No events scheduled in this period.</div>`;
+        return;
+    }
+    const sorted = [...visibleEvents].sort((a,b) => a.date.localeCompare(b.date));
+    let html = '';
+    sorted.forEach(ev => {
+        const d = dateFromKey(ev.date);
+        const label = `${d.getDate()} ${DAY_NAMES[d.getDay()]}`;
+        const icon  = CATEGORY_ICONS[ev.category] || '📋';
+        const timeStr = (ev.startTime && ev.endTime) ? `${ev.startTime}–${ev.endTime}` : (ev.startTime || '');
+        
+        let attendeesHtml = '';
+        if (ev.attendees && ev.attendees.length > 0) {
+            const names = ev.attendees.map(idx => MEMBERS[idx]).join(', ');
+            attendeesHtml = `<div class="event-attendees">👥 Assigned: ${names}</div>`;
+        }
+
+        // Hide delete button from viewers via admin-only class
+        html += `<div class="event-card">
+            <button class="event-del admin-only" data-event-id="${ev.id}">✕</button>
+            <div class="event-header">
+                <span class="event-date">${label}</span>
+                ${timeStr ? `<span class="event-time-badge">⏰ ${timeStr}</span>` : ''}
+            </div>
+            <div>
+                <span style="font-size:16px;">${icon}</span>
+                <span class="event-title">${escHtml(ev.title)}</span>
+                ${ev.desc ? `<span class="event-desc">${escHtml(ev.desc)}</span>` : ''}
+            </div>
+            ${attendeesHtml}
+        </div>`;
+    });
+    container.innerHTML = html;
+    container.querySelectorAll('.event-del').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (!isAdmin) return; // double check
+            const id = Number(this.dataset.eventId);
+            events = events.filter(e => e.id !== id);
+            render();
+        });
+    });
+}
+
+// ---- Cell listeners ----
+function attachCellListeners() {
+    const cells = document.querySelectorAll('#rosterTable tbody td:not(:first-child)');
+    cells.forEach(td => {
+        const wrapper = td.querySelector('.cell-wrapper');
+        if (!wrapper) return;
+        const popup = wrapper.querySelector('.status-popup');
+        if (!popup) return;
+
+        const memberIdx = Number(popup.dataset.member);
+        const dateKey   = popup.dataset.date;
+
+        // Toggle popup on cell click
+        td.addEventListener('click', function(e) {
+            if (!isAdmin) return; // Prevent popup opening if not Admin
+            if (e.target.closest('.status-popup')) return;
+            document.querySelectorAll('.status-popup.active').forEach(p => { if (p!==popup) p.classList.remove('active'); });
+            popup.classList.toggle('active');
+        });
+
+        // Status buttons
+        popup.querySelectorAll('.popup-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (!isAdmin) return;
+                e.stopPropagation();
+                roster[memberIdx][dateKey] = this.dataset.status;
+                popup.classList.remove('active');
+                render();
+            });
+        });
+
+        // Time apply
+        const applyTimeBtn = popup.querySelector('.popup-time-apply');
+        if (applyTimeBtn) {
+            applyTimeBtn.addEventListener('click', function(e) {
+                if (!isAdmin) return;
+                e.stopPropagation();
+                const start = popup.querySelector('.time-start').value;
+                const end   = popup.querySelector('.time-end').value;
+                if (start && end) {
+                    cellTime[memberIdx][dateKey] = { start, end };
+                    popup.classList.remove('active');
+                    render();
+                }
+            });
+        }
+
+        // Time clear
+        const clearTimeBtn = popup.querySelector('.popup-time-clear');
+        if (clearTimeBtn) {
+            clearTimeBtn.addEventListener('click', function(e) {
+                if (!isAdmin) return;
+                e.stopPropagation();
+                cellTime[memberIdx][dateKey] = null;
+                popup.classList.remove('active');
+                render();
+            });
+        }
+    });
+
+    // Outside click closes popups
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.cell-wrapper')) {
+            document.querySelectorAll('.status-popup.active').forEach(p => p.classList.remove('active'));
+        }
+    });
+}
+
+function escHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// ============================================================
+//  AUTHENTICATION LOGIC (Admin Login)
+// ============================================================
+
+const loginModal = document.getElementById('loginModal');
+const lockoutMsgEl = document.getElementById('lockoutMsg');
+
+function updateLockoutUI() {
+    const now = Date.now();
+    const submitBtn = document.getElementById('submitLogin');
+    if (now < lockoutUntil) {
+        const secsLeft = Math.ceil((lockoutUntil - now) / 1000);
+        lockoutMsgEl.style.display = 'block';
+        lockoutMsgEl.textContent = `🔒 Too many failed attempts. Try again in ${secsLeft}s.`;
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = 0.5;
+        clearTimeout(lockoutTimer);
+        lockoutTimer = setTimeout(updateLockoutUI, 1000);
+    } else {
+        lockoutMsgEl.style.display = 'none';
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = 1;
+        clearTimeout(lockoutTimer);
+    }
+}
+
+document.getElementById('openLoginBtn').addEventListener('click', () => {
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+    loginModal.classList.add('active');
+    updateLockoutUI();
+});
+
+document.getElementById('closeLoginModal').addEventListener('click', () => {
+    loginModal.classList.remove('active');
+});
+
+document.getElementById('submitLogin').addEventListener('click', async () => {
+    if (Date.now() < lockoutUntil) { updateLockoutUI(); return; }
+
+    const u = document.getElementById('loginUser').value;
+    const p = document.getElementById('loginPass').value;
+    const hash = await sha256(p);
+
+    if (u === adminAuth.username && hash === adminAuth.passHash) {
+        failedAttempts = 0;
+        lockoutUntil = 0;
+        saveAuthToStorage();
+        isAdmin = true;
+        document.body.classList.add('is-admin');
+        loginModal.classList.remove('active');
+        render(); // Re-render unlocks cell cursors and UI events
+        showToast('Welcome back, Admin', 'success');
+    } else {
+        failedAttempts++;
+        if (failedAttempts >= MAX_ATTEMPTS) {
+            lockoutUntil = Date.now() + LOCKOUT_MS;
+            failedAttempts = 0;
+            saveAuthToStorage();
+            updateLockoutUI();
+        } else {
+            saveAuthToStorage();
+            showToast(`Invalid username or password (${MAX_ATTEMPTS - failedAttempts} attempts left)`, 'error');
+        }
+    }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+    isAdmin = false;
+    document.body.classList.remove('is-admin');
+    document.querySelectorAll('.status-popup.active').forEach(p => p.classList.remove('active')); // close popups
+    render();
+    showToast('Logged out of admin mode', '');
+});
+
+// ---- Settings (change credentials) ----
+const settingsModal = document.getElementById('settingsModal');
+document.getElementById('openSettingsBtn').addEventListener('click', () => {
+    document.getElementById('settingsUser').value = adminAuth.username;
+    document.getElementById('settingsNewPass').value = '';
+    document.getElementById('settingsConfirmPass').value = '';
+    document.getElementById('settingsHint').textContent = '';
+    settingsModal.classList.add('active');
+});
+document.getElementById('closeSettingsModal').addEventListener('click', () => settingsModal.classList.remove('active'));
+settingsModal.addEventListener('click', e => { if (e.target===settingsModal) settingsModal.classList.remove('active'); });
+
+document.getElementById('saveSettings').addEventListener('click', async () => {
+    const newUser = document.getElementById('settingsUser').value.trim();
+    const newPass = document.getElementById('settingsNewPass').value;
+    const confirmPass = document.getElementById('settingsConfirmPass').value;
+    const hint = document.getElementById('settingsHint');
+
+    if (!newUser) { hint.textContent = 'Username cannot be empty.'; hint.style.color = '#dc2626'; return; }
+    if (newPass || confirmPass) {
+        if (newPass.length < 4) { hint.textContent = 'Password must be at least 4 characters.'; hint.style.color = '#dc2626'; return; }
+        if (newPass !== confirmPass) { hint.textContent = 'Passwords do not match.'; hint.style.color = '#dc2626'; return; }
+        adminAuth.passHash = await sha256(newPass);
+    }
+    adminAuth.username = newUser;
+    saveAuthToStorage();
+    settingsModal.classList.remove('active');
+    showToast('Admin settings updated', 'success');
+});
+
+// ---- GitHub Sync modal ----
+const githubModal = document.getElementById('githubModal');
+document.getElementById('openGithubBtn').addEventListener('click', openGithubModal);
+document.getElementById('githubStatus').addEventListener('click', () => { if (isAdmin) openGithubModal(); });
+
+function openGithubModal() {
+    document.getElementById('ghToken').value  = githubToken;
+    document.getElementById('ghOwner').value  = githubConfig.owner;
+    document.getElementById('ghRepo').value   = githubConfig.repo;
+    document.getElementById('ghPath').value   = githubConfig.path;
+    document.getElementById('ghBranch').value = githubConfig.branch;
+    document.getElementById('ghAutoSync').checked = githubConfig.autoSync;
+    document.getElementById('ghHint').textContent = '';
+    githubModal.classList.add('active');
+}
+document.getElementById('closeGithubModal').addEventListener('click', () => githubModal.classList.remove('active'));
+githubModal.addEventListener('click', e => { if (e.target===githubModal) githubModal.classList.remove('active'); });
+
+document.getElementById('ghSaveSettings').addEventListener('click', () => {
+    const owner  = document.getElementById('ghOwner').value.trim();
+    const repo   = document.getElementById('ghRepo').value.trim();
+    const path   = document.getElementById('ghPath').value.trim() || 'duty-roster-data.json';
+    const branch = document.getElementById('ghBranch').value.trim() || 'main';
+    const token  = document.getElementById('ghToken').value.trim();
+    const hint = document.getElementById('ghHint');
+
+    if (!owner || !repo) { hint.textContent = 'Repo owner and repo name are required.'; hint.style.color = '#dc2626'; return; }
+    if (!token) { hint.textContent = 'A Personal Access Token is required.'; hint.style.color = '#dc2626'; return; }
+
+    githubConfig = { owner, repo, path, branch, autoSync: document.getElementById('ghAutoSync').checked };
+    githubToken = token;
+    saveGithubConfig();
+    updateGithubStatusUI();
+    hint.style.color = '#059669';
+    hint.textContent = 'Saved. Use "Push Now" to upload the current roster.';
+    showToast('GitHub sync settings saved', 'success');
+});
+
+document.getElementById('ghPushNow').addEventListener('click', async () => {
+    // Use whatever is currently in the fields (in case user hasn't hit Save yet)
+    githubConfig.owner  = document.getElementById('ghOwner').value.trim()  || githubConfig.owner;
+    githubConfig.repo   = document.getElementById('ghRepo').value.trim()   || githubConfig.repo;
+    githubConfig.path   = document.getElementById('ghPath').value.trim()  || githubConfig.path;
+    githubConfig.branch = document.getElementById('ghBranch').value.trim() || githubConfig.branch;
+    githubToken = document.getElementById('ghToken').value.trim() || githubToken;
+    await githubPush(false);
+});
+document.getElementById('ghPullNow').addEventListener('click', async () => {
+    githubConfig.owner  = document.getElementById('ghOwner').value.trim()  || githubConfig.owner;
+    githubConfig.repo   = document.getElementById('ghRepo').value.trim()   || githubConfig.repo;
+    githubConfig.path   = document.getElementById('ghPath').value.trim()  || githubConfig.path;
+    githubConfig.branch = document.getElementById('ghBranch').value.trim() || githubConfig.branch;
+    githubToken = document.getElementById('ghToken').value.trim() || githubToken;
+    if (!confirm('This will overwrite the roster currently shown with whatever is saved on GitHub. Continue?')) return;
+    await githubPull();
+});
+document.getElementById('ghDisconnect').addEventListener('click', () => {
+    if (!confirm('Disconnect GitHub sync and remove the saved token from this browser?')) return;
+    clearGithubConfig();
+    updateGithubStatusUI();
+    githubModal.classList.remove('active');
+    showToast('GitHub sync disconnected', '');
+});
+
+// ---- Theme toggle ----
+document.getElementById('themeToggleBtn').addEventListener('click', () => {
+    isDarkMode = !isDarkMode;
+    applyTheme();
+    saveThemeToStorage();
+});
+
+// ---- Member search ----
+const searchInput = document.getElementById('memberSearch');
+const searchWrapEl = document.getElementById('searchWrap');
+searchInput.addEventListener('input', () => {
+    memberSearchTerm = searchInput.value;
+    searchWrapEl.classList.toggle('has-value', memberSearchTerm.length > 0);
+    render();
+});
+document.getElementById('searchClear').addEventListener('click', () => {
+    searchInput.value = '';
+    memberSearchTerm = '';
+    searchWrapEl.classList.remove('has-value');
+    render();
+});
+
+
+// ============================================================
+//  SAVE / LOAD DATA LOGIC
+// ============================================================
+
+// Save State to JSON File
+document.getElementById('saveDataBtn').addEventListener('click', function() {
+    const stateData = {
+        startDate: START_DATE.toISOString(),
+        endDate: END_DATE.toISOString(),
+        roster: roster,
+        cellTime: cellTime,
+        events: events,
+        eventIdCounter: eventIdCounter,
+        globalSiteStart: globalSiteStart,
+        globalSiteEnd: globalSiteEnd
+    };
+
+    const dataStr = JSON.stringify(stateData, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Duty_Roster_Backup_${getPeriodFileLabel()}.json`;
+    a.click();
+    
+    URL.revokeObjectURL(url);
+    showToast('Roster backup file downloaded', 'success');
+});
+
+// Load State from JSON File
+document.getElementById('loadDataInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        try {
+            const data = JSON.parse(event.target.result);
+            applyLoadedState(data);
+            render();
+            showToast('Roster data successfully loaded', 'success');
+        } catch(err) {
+            alert('Error loading file. Make sure it is a valid Duty Roster JSON backup.');
+            console.error(err);
+        }
+    };
+    reader.readAsText(file);
+    
+    // Reset input so the exact same file can trigger 'change' again if needed
+    e.target.value = '';
+});
+
+
+// ============================================================
+//  CONTROLS
+// ============================================================
+
+// ---- Month Navigator ----
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+let pickerViewYear = START_DATE.getFullYear();
+
+function setMonth(year, monthIndex) {
+    START_DATE = new Date(year, monthIndex, 1);
+    END_DATE   = new Date(year, monthIndex + 1, 0); // last day of that month
+    render();
+    showToast(`Switched to ${MONTH_NAMES[monthIndex]} ${year}`, '');
+}
+
+function renderMonthPickerGrid() {
+    const grid = document.getElementById('monthPickerGrid');
+    const today = new Date();
+    grid.innerHTML = MONTH_NAMES.map((m, i) => {
+        const isSelected = (i === START_DATE.getMonth() && pickerViewYear === START_DATE.getFullYear());
+        const isCurrent  = (i === today.getMonth() && pickerViewYear === today.getFullYear());
+        return `<button type="button" class="${isSelected ? 'active-month' : ''} ${isCurrent ? 'current-month-marker' : ''}" data-month="${i}" title="${isCurrent ? 'Current month' : ''}">${m.slice(0,3)}</button>`;
+    }).join('');
+    document.getElementById('pickerYearLabel').textContent = pickerViewYear;
+    grid.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setMonth(pickerViewYear, Number(btn.dataset.month));
+            document.getElementById('monthPickerPopup').classList.remove('active');
+        });
+    });
+}
+
+document.getElementById('monthPickerBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    pickerViewYear = START_DATE.getFullYear();
+    renderMonthPickerGrid();
+    document.getElementById('monthPickerPopup').classList.toggle('active');
+});
+document.getElementById('pickerPrevYear').addEventListener('click', (e) => {
+    e.stopPropagation();
+    pickerViewYear--;
+    renderMonthPickerGrid();
+});
+document.getElementById('pickerNextYear').addEventListener('click', (e) => {
+    e.stopPropagation();
+    pickerViewYear++;
+    renderMonthPickerGrid();
+});
+document.addEventListener('click', (e) => {
+    const popup = document.getElementById('monthPickerPopup');
+    if (popup.classList.contains('active') && !popup.contains(e.target) && e.target.id !== 'monthPickerBtn') {
+        popup.classList.remove('active');
+    }
+});
+
+document.getElementById('prevMonthBtn').addEventListener('click', () => {
+    const d = new Date(START_DATE.getFullYear(), START_DATE.getMonth() - 1, 1);
+    setMonth(d.getFullYear(), d.getMonth());
+});
+document.getElementById('nextMonthBtn').addEventListener('click', () => {
+    const d = new Date(START_DATE.getFullYear(), START_DATE.getMonth() + 1, 1);
+    setMonth(d.getFullYear(), d.getMonth());
+});
+document.getElementById('goCurrentMonthBtn').addEventListener('click', () => {
+    const today = new Date();
+    setMonth(today.getFullYear(), today.getMonth());
+});
+document.getElementById('toggleCustomRangeBtn').addEventListener('click', () => {
+    const row = document.getElementById('customRangeRow');
+    row.style.display = row.style.display === 'none' ? 'inline-flex' : 'none';
+});
+
+function getPeriodFileLabel() {
+    const isFullMonth = START_DATE.getDate() === 1 &&
+        END_DATE.getTime() === new Date(START_DATE.getFullYear(), START_DATE.getMonth() + 1, 0).getTime();
+    if (isFullMonth) return `${MONTH_NAMES[START_DATE.getMonth()]}_${START_DATE.getFullYear()}`;
+    return `${formatDateKey(START_DATE)}_to_${formatDateKey(END_DATE)}`;
+}
+
+document.getElementById('applyCalendarRange').addEventListener('click', function() {
+    const startStr = document.getElementById('calendarStart').value;
+    const endStr = document.getElementById('calendarEnd').value;
+    
+    if(!startStr || !endStr) { alert("Please select both a start and end date."); return; }
+    const newStart = dateFromKey(startStr);
+    const newEnd = dateFromKey(endStr);
+    if(newStart > newEnd) { alert("Start date must be before End date."); return; }
+
+    START_DATE = newStart;
+    END_DATE = newEnd;
+    render();
+});
+
+document.getElementById('applySiteTime').addEventListener('click', function() {
+    const s = document.getElementById('siteStart').value;
+    const e = document.getElementById('siteEnd').value;
+    if (s && e) { globalSiteStart = s; globalSiteEnd = e; render(); }
+});
+
+document.getElementById('resetRoster').addEventListener('click', function() {
+    if (confirm('Reset all statuses and times for all members?')) {
+        const days = getDaysArray();
+        MEMBERS.forEach((_,idx) => {
+            days.forEach(d => {
+                const k = formatDateKey(d);
+                roster[idx][k]   = '';
+                cellTime[idx][k] = null;
+            });
+        });
+        render();
+        showToast('Roster reset', '');
+    }
+});
+
+// CSV Export logic
+document.getElementById('exportCSV').addEventListener('click', function() {
+    const days = getDaysArray();
+    let csv = 'Member,';
+    
+    csv += days.map(d => `${d.getDate()} ${DAY_NAMES[d.getDay()]}`).join(',') + '\n';
+
+    MEMBERS.forEach((name, idx) => {
+        let row = `"${name}",`;
+        let statuses = days.map(d => {
+            const k = formatDateKey(d);
+            const status = roster[idx][k];
+            const display = status ? (STATUS_LABELS[status] || status) : 'Working';
+            const time = getCellTimeDisplay(idx, k);
+            return status === 'off' ? 'OFF' : `"${display} (${time})"`;
+        });
+        row += statuses.join(',') + '\n';
+        csv += row;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Duty_Roster_${getPeriodFileLabel()}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+});
+
+// PDF Export Logic
+document.getElementById('exportPDF').addEventListener('click', function() {
+    window.print();
+});
+
+// ---- Event Modal ----
+const eventModal = document.getElementById('eventModal');
+document.getElementById('openEventModal').addEventListener('click', function() {
+    const firstDay = getDaysArray()[0];
+    document.getElementById('eventDate').value = formatDateKey(firstDay);
+    document.getElementById('eventTitle').value = '';
+    document.getElementById('eventDesc').value  = '';
+    document.getElementById('eventStartTime').value = '';
+    document.getElementById('eventEndTime').value   = '';
+    document.getElementById('eventCategory').value  = 'general';
+    document.querySelectorAll('.attendee-cb').forEach(cb => cb.checked = false);
+
+    eventModal.classList.add('active');
+});
+document.getElementById('closeEventModal').addEventListener('click', () => eventModal.classList.remove('active'));
+eventModal.addEventListener('click', e => { if (e.target===eventModal) eventModal.classList.remove('active'); });
+loginModal.addEventListener('click', e => { if (e.target===loginModal) loginModal.classList.remove('active'); });
+
+document.getElementById('saveEvent').addEventListener('click', function() {
+    const title     = document.getElementById('eventTitle').value.trim();
+    const date      = document.getElementById('eventDate').value;
+    const desc      = document.getElementById('eventDesc').value.trim();
+    const startTime = document.getElementById('eventStartTime').value;
+    const endTime   = document.getElementById('eventEndTime').value;
+    const category  = document.getElementById('eventCategory').value;
+    const selectedAttendees = Array.from(document.querySelectorAll('.attendee-cb:checked')).map(cb => Number(cb.value));
+
+    if (!title) { alert('Please enter an event title.'); return; }
+    if (!date)  { alert('Please select a date.'); return; }
+    
+    events.push({ 
+        id: ++eventIdCounter, date, title, desc, startTime, endTime, category, attendees: selectedAttendees 
+    });
+    
+    eventModal.classList.remove('active');
+    render();
+});
+
+// ============================================================
+//  INIT
+// ============================================================
+initRoster();
+loadAuthFromStorage();
+loadThemeFromStorage();
+loadGithubConfig();
+updateGithubStatusUI();
+document.getElementById('siteStart').value = globalSiteStart;
+document.getElementById('siteEnd').value   = globalSiteEnd;
+
+// ---- Demo fill (Generates some initial sample data, only used when there's no saved roster yet) ----
+function demoFill() {
+    const days     = getDaysArray();
+    const dateKeys = days.map(d => formatDateKey(d));
+    MEMBERS.forEach((_,idx) => {
+        const weekAssign = {};
+        days.forEach((d,i) => {
+            const wk = getWeekNumber(d);
+            if (!weekAssign[wk]) weekAssign[wk] = [];
+            weekAssign[wk].push(i);
+        });
+        Object.keys(weekAssign).forEach(wk => {
+            const indices = weekAssign[wk];
+            if (!indices.length) return;
+            const pick   = indices[Math.floor(Math.random()*indices.length)];
+            const status = STATUSES[Math.floor(Math.random()*STATUSES.length)];
+            roster[idx][dateKeys[pick]] = status;
+        });
+    });
+    // Demo events
+    const d1 = getDaysArray()[5];
+    const d2 = getDaysArray()[18];
+    events.push({ id:++eventIdCounter, date:formatDateKey(d1), title:'AV Systems Integration Conference', desc:'Rwenzori Conference Centre', startTime:'09:00', endTime:'17:00', category:'conference', attendees:[7] });
+    events.push({ id:++eventIdCounter, date:formatDateKey(d2), title:'Safety Training', desc:'New safety protocols', startTime:'09:00', endTime:'12:00', category:'training', attendees:[0, 2, 4] });
+}
+
+// Load order: local browser storage first (fastest, always available offline).
+// If this device has no local copy yet but GitHub sync is configured, pull from GitHub
+// so a second device/browser picks up where the first one left off.
+(async function loadInitialData() {
+    const savedRoster = loadFromStorageRaw();
+    if (savedRoster) {
+        applyLoadedState(savedRoster);
+        render();
+    } else if (githubConfigured()) {
+        try {
+            setGithubStatus('syncing', 'GitHub: loading…');
+            const existing = await githubFetchFile();
+            if (existing) {
+                applyLoadedState(JSON.parse(base64ToUtf8(existing.content)));
+            } else {
+                demoFill();
+            }
+        } catch (err) {
+            console.error('Initial GitHub pull failed:', err);
+            demoFill();
+        }
+        updateGithubStatusUI();
+        render();
+    } else {
+        demoFill();
+        render();
+    }
+})();
+
+// ESC to close
+document.addEventListener('keydown', function(e) {
+    if (e.key==='Escape') {
+        eventModal.classList.remove('active');
+        loginModal.classList.remove('active');
+        settingsModal.classList.remove('active');
+        githubModal.classList.remove('active');
+        document.querySelectorAll('.status-popup.active').forEach(p=>p.classList.remove('active'));
+    }
+});
+</script>
+</body>
+</html>

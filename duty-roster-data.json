@@ -1995,5 +1995,7 @@
   "globalSiteEnd": "17:00",
   "adminSelectedYear": 2026,
   "adminSelectedMonth": 5,
-  "_syncedAt": "2026-06-27T14:45:00.864Z"
+  "adminSelectedStartDate": "2026-06-01",
+  "adminSelectedEndDate": "2026-06-30",
+  "_syncedAt": "2026-06-27T15:00:42.812Z"
 }

@@ -2004,8 +2004,8 @@
     },
     {
       "id": 8,
-      "startDate": "2026-06-26",
-      "endDate": "2026-06-26",
+      "startDate": "2026-06-30",
+      "endDate": "2026-06-30",
       "title": "Wedding Reception",
       "desc": "CWBH",
       "startTime": "14:00",
@@ -2023,5 +2023,5 @@
   "adminSelectedMonth": 5,
   "adminSelectedStartDate": "2026-06-26",
   "adminSelectedEndDate": "2026-07-25",
-  "_syncedAt": "2026-06-27T22:43:38.804Z"
+  "_syncedAt": "2026-06-27T22:44:39.956Z"
 }

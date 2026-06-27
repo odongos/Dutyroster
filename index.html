@@ -424,6 +424,45 @@
             .roster-wrapper thead th:first-child {
                 text-align: left !important;
                 padding-left: 6px !important;
+                min-width: 140px !important;
+                width: auto !important;
+            }
+
+            /* Style member names and department in print */
+            .roster-wrapper tbody td:first-child {
+                font-size: 11px !important;
+                padding: 8px 6px !important;
+                line-height: 1.6;
+            }
+
+            /* Member name - bold */
+            .roster-wrapper tbody td:first-child strong {
+                display: block;
+                font-weight: 700;
+                color: #0f172a;
+                margin-bottom: 2px;
+            }
+
+            /* Member department - lighter color, smaller */
+            .roster-wrapper tbody td:first-child .member-dept {
+                display: inline;
+                color: #64748b;
+                font-size: 9px;
+                font-weight: 400;
+            }
+
+            /* Off counter - teal badge style */
+            .roster-wrapper tbody td:first-child .off-counter {
+                display: block;
+                background: #d1fae5 !important;
+                color: #0d7377 !important;
+                padding: 1px 6px !important;
+                border-radius: 10px;
+                font-size: 9px !important;
+                font-weight: 600;
+                margin-top: 3px;
+                width: fit-content;
+            }
             }
 
             .roster-wrapper thead tr:first-child th, .roster-wrapper thead tr:last-child th{
@@ -1255,7 +1294,7 @@ function render() {
         const matchesDept   = departmentFilter === 'all' || (m.department || 'Unassigned') === departmentFilter;
         const matches = matchesSearch && matchesDept;
         bodyHtml += `<tr class="${matches ? '' : 'row-hidden'}">`;
-        bodyHtml += `<td>${escHtml(name)} <span class="member-dept">· ${escHtml(m.department || 'Unassigned')}</span> <span class="off-counter ${warn}">${totalOff} off</span></td>`;
+        bodyHtml += `<td><strong>${escHtml(name)}</strong> <span class="member-dept">· ${escHtml(m.department || 'Unassigned')}</span> <span class="off-counter ${warn}">${totalOff} off</span></td>`;
 
         dateKeys.forEach((dk, i) => {
             const status    = roster[id][dk] || '';

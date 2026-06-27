@@ -390,6 +390,7 @@
             .print-summary span{font-weight:700;}
             .print-legend{display:flex !important;flex-wrap:wrap;gap:10px 18px;margin-bottom:12px;font-size:9px;color:#1e293b;}
             .print-legend .swatch{width:10px;height:10px;border:1px solid #94a3b8;display:inline-block;vertical-align:middle;margin-right:4px;}
+            .print-disclaimer{display:block !important;background:#fef2f2;border:1.5px solid #fecaca;border-radius:8px;padding:10px 14px;margin-top:18px;margin-bottom:18px;font-size:10px;color:#991b1b;line-height:1.5;}
             .print-signatures{display:flex !important;justify-content:space-between;margin-top:36px;gap:40px;}
             .print-signatures .sig-block{flex:1;border-top:1px solid #475569;padding-top:6px;font-size:10px;color:#334155;}
 
@@ -512,6 +513,7 @@
             </select>
             <button class="btn btn-success admin-only" id="openStaffBtn">👤 Manage Staff</button>
             <button class="btn btn-success admin-only" id="openEventModal">➕ Add Event</button>
+            <button class="btn btn-outline admin-only" id="generateRosterBtn">📋 Generate Roster</button>
             <button class="btn btn-outline admin-only" id="resetRoster">🔄 Reset All</button>
             <button class="btn btn-dark admin-only" id="saveDataBtn">💾 Save Roster File</button>
             
@@ -563,6 +565,11 @@
         <div class="events-list" id="eventsList">
             <div style="color:var(--text-faint);font-size:14px;padding:8px 0;">No events scheduled yet.</div>
         </div>
+    </div>
+
+    <!-- Print-only disclaimer -->
+    <div class="print-disclaimer print-only">
+        <strong>⚠️ IMPORTANT NOTE:</strong> This roster is subject to change based on available programs, events, and operational requirements. Staff should confirm their scheduled duties with management before each shift.
     </div>
 
     <!-- Print-only sign-off block -->
@@ -798,6 +805,10 @@ const DEFAULT_DEPARTMENTS = [
 let customDepartments = []; // departments the admin has explicitly added, beyond the defaults
 let departmentFilter = 'all';
 
+// Published/Generated Roster — what gets shown in view-only mode
+// Separate from the working roster so admin can edit future months without changing what viewers see
+let publishedRoster = null; // { startDate, endDate, roster, cellTime, events, members, customDepartments, generatedAt }
+
 function getMemberById(id) { return MEMBERS.find(m => m.id === id); }
 function getMemberName(id) { const m = getMemberById(id); return m ? m.name : '(removed member)'; }
 function getUsedDepartments() {
@@ -877,6 +888,7 @@ function saveToStorage() {
             globalSiteStart, globalSiteEnd,
             members: MEMBERS, nextMemberId,
             customDepartments,
+            publishedRoster,
             _savedAt: new Date().toISOString()
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -910,6 +922,9 @@ function applyLoadedState(data) {
     }
     if (Array.isArray(data.customDepartments)) {
         customDepartments = data.customDepartments;
+    }
+    if (data.publishedRoster && typeof data.publishedRoster === 'object') {
+        publishedRoster = data.publishedRoster;
     }
     document.getElementById('siteStart').value = globalSiteStart;
     document.getElementById('siteEnd').value   = globalSiteEnd;
@@ -1006,6 +1021,7 @@ async function githubPush(silent) {
             globalSiteStart, globalSiteEnd,
             members: MEMBERS, nextMemberId,
             customDepartments,
+            publishedRoster,
             _syncedAt: new Date().toISOString()
         };
         const body = {
@@ -1301,7 +1317,20 @@ function render() {
     // ---- Header Info ----
     document.getElementById('siteTimeDisplay').textContent = `⏰ ${globalSiteStart} – ${globalSiteEnd}`;
     const periodLabel = `${days[0].toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})} – ${days[days.length-1].toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}`;
-    document.getElementById('periodSubtitle').textContent = periodLabel;
+    
+    let subtitleText = periodLabel;
+    if (publishedRoster && !isAdmin) {
+        // View-only mode: show published roster status
+        const pubLabel = `${new Date(publishedRoster.startDate).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})} – ${new Date(publishedRoster.endDate).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}`;
+        const genDate = new Date(publishedRoster.generatedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+        subtitleText = `📋 Published Roster · ${pubLabel} (Generated ${genDate})`;
+    } else if (isAdmin && publishedRoster) {
+        subtitleText = `📝 Working Roster · ${periodLabel} (Published exists)`;
+    } else if (isAdmin) {
+        subtitleText = `📝 Working Roster · ${periodLabel}`;
+    }
+    
+    document.getElementById('periodSubtitle').textContent = subtitleText;
     document.title = `Duty Roster - ${periodLabel}`;
     document.getElementById('printPeriod').textContent = periodLabel;
     document.getElementById('printGenerated').textContent = new Date().toLocaleString('en-GB');
@@ -1842,7 +1871,8 @@ document.getElementById('saveDataBtn').addEventListener('click', function() {
         globalSiteEnd: globalSiteEnd,
         members: MEMBERS,
         nextMemberId: nextMemberId,
-        customDepartments: customDepartments
+        customDepartments: customDepartments,
+        publishedRoster: publishedRoster
     };
 
     const dataStr = JSON.stringify(stateData, null, 2);
@@ -1916,17 +1946,20 @@ function renderMonthPickerGrid() {
 }
 
 document.getElementById('monthPickerBtn').addEventListener('click', (e) => {
+    if (!isAdmin) { showToast('Month navigation disabled in view-only mode', 'error'); return; }
     e.stopPropagation();
     pickerViewYear = START_DATE.getFullYear();
     renderMonthPickerGrid();
     document.getElementById('monthPickerPopup').classList.toggle('active');
 });
 document.getElementById('pickerPrevYear').addEventListener('click', (e) => {
+    if (!isAdmin) return;
     e.stopPropagation();
     pickerViewYear--;
     renderMonthPickerGrid();
 });
 document.getElementById('pickerNextYear').addEventListener('click', (e) => {
+    if (!isAdmin) return;
     e.stopPropagation();
     pickerViewYear++;
     renderMonthPickerGrid();
@@ -1939,18 +1972,22 @@ document.addEventListener('click', (e) => {
 });
 
 document.getElementById('prevMonthBtn').addEventListener('click', () => {
+    if (!isAdmin) { showToast('Month navigation disabled in view-only mode', 'error'); return; }
     const d = new Date(START_DATE.getFullYear(), START_DATE.getMonth() - 1, 1);
     setMonth(d.getFullYear(), d.getMonth());
 });
 document.getElementById('nextMonthBtn').addEventListener('click', () => {
+    if (!isAdmin) { showToast('Month navigation disabled in view-only mode', 'error'); return; }
     const d = new Date(START_DATE.getFullYear(), START_DATE.getMonth() + 1, 1);
     setMonth(d.getFullYear(), d.getMonth());
 });
 document.getElementById('goCurrentMonthBtn').addEventListener('click', () => {
+    if (!isAdmin) { showToast('Month navigation disabled in view-only mode', 'error'); return; }
     const today = new Date();
     setMonth(today.getFullYear(), today.getMonth());
 });
 document.getElementById('toggleCustomRangeBtn').addEventListener('click', () => {
+    if (!isAdmin) { showToast('Date range locked in view-only mode', 'error'); return; }
     const row = document.getElementById('customRangeRow');
     row.style.display = row.style.display === 'none' ? 'inline-flex' : 'none';
 });
@@ -1980,6 +2017,25 @@ document.getElementById('applySiteTime').addEventListener('click', function() {
     const s = document.getElementById('siteStart').value;
     const e = document.getElementById('siteEnd').value;
     if (s && e) { globalSiteStart = s; globalSiteEnd = e; render(); }
+});
+
+document.getElementById('generateRosterBtn').addEventListener('click', function() {
+    if (!confirm(`Publish the roster from ${formatDateKey(START_DATE)} to ${formatDateKey(END_DATE)} for view-only users?\n\nYou can still edit your working copy, but viewers will see this locked version until you generate a new one.`)) return;
+    
+    publishedRoster = {
+        startDate: START_DATE.toISOString(),
+        endDate: END_DATE.toISOString(),
+        roster: JSON.parse(JSON.stringify(roster)), // deep copy
+        cellTime: JSON.parse(JSON.stringify(cellTime)),
+        events: JSON.parse(JSON.stringify(events)),
+        members: JSON.parse(JSON.stringify(MEMBERS)),
+        customDepartments: [...customDepartments],
+        generatedAt: new Date().toISOString()
+    };
+    saveToStorage();
+    scheduleGithubAutoPush();
+    render();
+    showToast('Roster generated and published to viewers', 'success');
 });
 
 document.getElementById('resetRoster').addEventListener('click', function() {
@@ -2108,15 +2164,12 @@ function demoFill() {
 
 // Load order:
 // 1) Show local browser storage immediately if present (fast first paint, works offline).
-// 2) If GitHub sync is configured, check GitHub in the background and — if it's newer than
-//    what's cached on this device — switch to it. This is what makes sure a month (and
-//    schedule) chosen by the admin shows up the same way in view-only mode on any device,
-//    instead of a device being stuck on whatever month it happened to load last.
+// 2) If GitHub sync is configured, check GitHub in the background and switch if newer.
+// 3) In view-only mode, if a publishedRoster exists, display that locked version instead.
 (async function loadInitialData() {
     const savedRoster = loadFromStorageRaw();
     if (savedRoster) {
         applyLoadedState(savedRoster);
-        render();
     }
 
     if (githubConfigured()) {
@@ -2129,22 +2182,32 @@ function demoFill() {
                 const localTime  = savedRoster && savedRoster._savedAt ? new Date(savedRoster._savedAt).getTime() : -1;
                 if (!savedRoster || remoteTime > localTime) {
                     applyLoadedState(remoteData);
-                    render();
                 }
             } else if (!savedRoster) {
                 demoFill();
-                render();
             }
             updateGithubStatusUI();
         } catch (err) {
             console.error('Initial GitHub pull failed:', err);
             setGithubStatus('error', 'GitHub: load failed');
-            if (!savedRoster) { demoFill(); render(); }
+            if (!savedRoster) { demoFill(); }
         }
     } else if (!savedRoster) {
         demoFill();
-        render();
     }
+
+    // In view-only mode, if a published roster exists, use that instead of the working one
+    if (!isAdmin && publishedRoster) {
+        START_DATE = new Date(publishedRoster.startDate);
+        END_DATE   = new Date(publishedRoster.endDate);
+        roster     = publishedRoster.roster;
+        cellTime   = publishedRoster.cellTime;
+        events     = publishedRoster.events;
+        MEMBERS    = publishedRoster.members;
+        customDepartments = publishedRoster.customDepartments || [];
+    }
+
+    render();
 })();
 
 // ESC to close

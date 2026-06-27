@@ -1819,12 +1819,22 @@
         2,
         6
       ]
+    },
+    {
+      "id": 5,
+      "date": "2026-06-27",
+      "title": "STI",
+      "desc": "",
+      "startTime": "08:00",
+      "endTime": "00:00",
+      "category": "conference",
+      "attendees": []
     }
   ],
-  "eventIdCounter": 4,
+  "eventIdCounter": 5,
   "globalSiteStart": "08:00",
   "globalSiteEnd": "17:00",
   "adminSelectedYear": 2026,
   "adminSelectedMonth": 5,
-  "_syncedAt": "2026-06-27T12:27:31.671Z"
+  "_syncedAt": "2026-06-27T12:28:37.069Z"
 }

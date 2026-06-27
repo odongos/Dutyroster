@@ -615,6 +615,7 @@
             <button class="btn btn-success admin-only" id="openEventModal">➕ Add Event</button>
             <button class="btn btn-outline admin-only" id="resetRoster">🔄 Reset All</button>
             <button class="btn btn-dark admin-only" id="saveDataBtn">💾 Save Roster File</button>
+            <button class="btn btn-success admin-only" id="publishBtn" title="Push the current roster to GitHub so everyone sees the latest version">📤 Publish</button>
             
             <label class="btn btn-dark admin-only" style="margin:0; font-weight:600; display:flex; align-items:center; cursor:pointer;">
                 📂 Load Roster File
@@ -996,6 +997,7 @@ const GH_TOKEN_KEY  = 'dutyRoster_gh_token_v1';
 let githubConfig = { owner: '', repo: '', path: 'duty-roster-data.json', branch: 'main', autoSync: true };
 let githubToken  = '';
 let githubPushTimer = null;
+let githubPushInFlight = false; // guards against overlapping pushes racing on the file's sha
 
 function githubConfigured() {
     return !!(githubToken && githubConfig.owner && githubConfig.repo && githubConfig.path && githubConfig.branch);
@@ -1067,6 +1069,12 @@ async function githubFetchFile() {
 
 async function githubPush(silent) {
     if (!githubConfigured()) { if (!silent) showToast('Set up GitHub sync first (🐙 button)', 'error'); return; }
+    if (githubPushInFlight) {
+        // A push is already in progress on this device — re-arm so this change isn't dropped.
+        scheduleGithubAutoPush();
+        return;
+    }
+    githubPushInFlight = true;
     setGithubStatus('syncing', 'GitHub: syncing…');
     try {
         const existing = await githubFetchFile();
@@ -1097,6 +1105,9 @@ async function githubPush(silent) {
         });
         if (!res.ok) {
             const errBody = await res.json().catch(() => ({}));
+            if (res.status === 409 || /does not match/i.test(errBody.message || '')) {
+                throw new Error("Someone else just updated the roster on GitHub. Click 🐙 → Pull Now to get the latest version, then try again.");
+            }
             throw new Error(errBody.message || `Push failed (${res.status})`);
         }
         updateGithubStatusUI();
@@ -1105,6 +1116,8 @@ async function githubPush(silent) {
         console.error('GitHub push error:', err);
         setGithubStatus('error', 'GitHub: push failed');
         if (!silent) showToast(`GitHub push failed: ${err.message}`, 'error');
+    } finally {
+        githubPushInFlight = false;
     }
 }
 
@@ -1162,6 +1175,7 @@ async function loadPublishedRoster() {
 }
 
 function scheduleGithubAutoPush() {
+    if (!isAdmin) return; // Viewers should only ever pull — never write back to GitHub
     if (!githubConfigured() || !githubConfig.autoSync) return;
     clearTimeout(githubPushTimer);
     githubPushTimer = setTimeout(() => githubPush(true), 4000);
@@ -1723,6 +1737,10 @@ document.getElementById('submitLogin').addEventListener('click', async () => {
         isAdmin = true;
         document.body.classList.add('is-admin');
         loginModal.classList.remove('active');
+        // Open to the last configured page — whatever date range (full month or
+        // custom range) admin had set before, not just whatever the viewer was looking at
+        START_DATE = dateFromKey(adminSelectedStartDate);
+        END_DATE   = dateFromKey(adminSelectedEndDate);
         render(); // Re-render unlocks cell cursors and UI events
         showToast('Welcome back, Admin', 'success');
     } else {
@@ -1743,9 +1761,9 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
     isAdmin = false;
     document.body.classList.remove('is-admin');
     document.querySelectorAll('.status-popup.active').forEach(p => p.classList.remove('active')); // close popups
-    // Snap view mode back to admin-selected month
-    START_DATE = new Date(adminSelectedYear, adminSelectedMonth, 1);
-    END_DATE   = new Date(adminSelectedYear, adminSelectedMonth + 1, 0);
+    // Snap view mode back to exactly what admin configured (custom range or whole month)
+    START_DATE = dateFromKey(adminSelectedStartDate);
+    END_DATE   = dateFromKey(adminSelectedEndDate);
     render();
     showToast('Logged out of admin mode', '');
 });
@@ -1847,6 +1865,12 @@ document.getElementById('ghDisconnect').addEventListener('click', () => {
 // ---- View-only banner: "Load Published" button ----
 document.getElementById('loadPublishedBtn').addEventListener('click', () => loadPublishedRoster());
 
+// ---- Admin toolbar: "Publish" button — pushes the current roster straight to GitHub ----
+document.getElementById('publishBtn').addEventListener('click', () => {
+    if (!githubConfigured()) { showToast('Set up GitHub sync first (🐙 button)', 'error'); return; }
+    githubPush(false);
+});
+
 // ---- Theme toggle ----
 document.getElementById('themeToggleBtn').addEventListener('click', () => {
     isDarkMode = !isDarkMode;
@@ -1937,6 +1961,8 @@ function setMonth(year, monthIndex) {
     END_DATE   = new Date(year, monthIndex + 1, 0); // last day of that month
     adminSelectedYear  = year;
     adminSelectedMonth = monthIndex;
+    adminSelectedStartDate = formatDateKey(START_DATE);
+    adminSelectedEndDate   = formatDateKey(END_DATE);
     render();
     showToast(`Switched to ${MONTH_NAMES[monthIndex]} ${year}`, '');
 }
@@ -2017,7 +2043,14 @@ document.getElementById('applyCalendarRange').addEventListener('click', function
 
     START_DATE = newStart;
     END_DATE = newEnd;
+    // Remember this exact custom range so the view-only page (and a later admin
+    // login) shows precisely this — not just the whole month it falls within.
+    adminSelectedStartDate = formatDateKey(newStart);
+    adminSelectedEndDate   = formatDateKey(newEnd);
+    adminSelectedYear  = newStart.getFullYear();
+    adminSelectedMonth = newStart.getMonth();
     render();
+    showToast(`Custom range set: ${formatDateKey(newStart)} – ${formatDateKey(newEnd)}`, '');
 });
 
 document.getElementById('applySiteTime').addEventListener('click', function() {

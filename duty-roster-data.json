@@ -1988,14 +1988,36 @@
       ],
       "startDate": "2026-06-28",
       "endDate": "2026-06-28"
+    },
+    {
+      "id": 7,
+      "startDate": "2026-06-30",
+      "endDate": "2026-07-04",
+      "title": "Paliament of Uganda",
+      "desc": "",
+      "startTime": "08:00",
+      "endTime": "19:00",
+      "category": "conference",
+      "attendees": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
     }
   ],
-  "eventIdCounter": 6,
+  "eventIdCounter": 7,
   "globalSiteStart": "08:00",
   "globalSiteEnd": "17:00",
   "adminSelectedYear": 2026,
   "adminSelectedMonth": 5,
   "adminSelectedStartDate": "2026-06-01",
   "adminSelectedEndDate": "2026-06-30",
-  "_syncedAt": "2026-06-27T16:06:21.297Z"
+  "_syncedAt": "2026-06-27T16:09:17.626Z"
 }

@@ -1,6 +1,6 @@
 {
-  "startDate": "2026-05-31T21:00:00.000Z",
-  "endDate": "2026-06-29T21:00:00.000Z",
+  "startDate": "2026-06-25T21:00:00.000Z",
+  "endDate": "2026-07-24T21:00:00.000Z",
   "roster": {
     "0": {
       "2026-06-01": "",
@@ -2021,7 +2021,7 @@
   "globalSiteEnd": "17:00",
   "adminSelectedYear": 2026,
   "adminSelectedMonth": 5,
-  "lastPublished": null,
-  "publishedPeriodLabel": null,
-  "_syncedAt": "2026-06-27T22:36:20.055Z"
+  "adminSelectedStartDate": "2026-06-26",
+  "adminSelectedEndDate": "2026-07-25",
+  "_syncedAt": "2026-06-27T22:43:38.804Z"
 }

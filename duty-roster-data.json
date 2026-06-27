@@ -1992,10 +1992,5 @@
   ],
   "eventIdCounter": 6,
   "globalSiteStart": "08:00",
-  "globalSiteEnd": "17:00",
-  "adminSelectedYear": 2026,
-  "adminSelectedMonth": 5,
-  "adminSelectedStartDate": "2026-06-01",
-  "adminSelectedEndDate": "2026-06-30",
-  "_syncedAt": "2026-06-27T15:07:03.697Z"
+  "globalSiteEnd": "17:00"
 }

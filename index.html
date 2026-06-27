@@ -182,6 +182,9 @@
         .event-card .event-attendees{font-size:12px;color:#3730a3;font-weight:600;margin-top:4px;display:flex;align-items:flex-start;gap:6px;}
         .event-card .event-del{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:16px;padding:0 4px;transition:0.15s;}
         .event-card .event-del:hover{color:#dc2626;}
+        .event-card .event-edit{position:absolute;top:12px;right:36px;background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:15px;padding:0 4px;transition:0.15s;}
+        .event-card .event-edit:hover{color:#4338ca;}
+        .event-card .event-date-range{font-weight:700;font-size:13px;color:#4338ca;background:#eef2ff;padding:2px 12px;border-radius:20px;white-space:nowrap;}
 
         /* ===== MODALS ===== */
         .modal-overlay{display:none;position:fixed;inset:0;background:var(--modal-overlay);backdrop-filter:blur(4px);z-index:999;justify-content:center;align-items:center;}
@@ -268,6 +271,98 @@
         /* ===== ADMIN & VIEW MODE LOGIC ===== */
         body:not(.is-admin) .admin-only { display: none !important; }
         body.is-admin #openLoginBtn { display: none !important; }
+        body.is-admin .view-only-banner { display: none !important; }
+
+        /* ===== VIEW-MODE BANNER ===== */
+        .view-only-banner{
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #f1f5f9;
+            border-radius: 16px;
+            padding: 18px 24px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        body.dark-mode .view-only-banner{
+            background: linear-gradient(135deg, #0b1220 0%, #060d1a 100%);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .view-banner-left { display:flex; flex-direction:column; gap:4px; }
+        .view-banner-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #f8fafc;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .view-banner-period {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(99,102,241,0.25);
+            border: 1px solid rgba(99,102,241,0.4);
+            color: #a5b4fc;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 3px 14px;
+            border-radius: 20px;
+            letter-spacing: 0.2px;
+        }
+        .view-banner-meta {
+            font-size: 12px;
+            color: #94a3b8;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px;
+            margin-top: 2px;
+        }
+        .view-banner-meta span { display:flex; align-items:center; gap:5px; }
+        .view-banner-meta .meta-dot { width:5px; height:5px; border-radius:50%; background:#475569; }
+        .view-banner-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+        .view-banner-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16,185,129,0.15);
+            border: 1px solid rgba(16,185,129,0.3);
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #34d399;
+        }
+        .view-banner-status .status-pulse {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 0 0 rgba(16,185,129,0.4);
+            animation: pulse-ring 1.8s ease-out infinite;
+        }
+        @keyframes pulse-ring {
+            0%   { box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
+            70%  { box-shadow: 0 0 0 8px rgba(16,185,129,0); }
+            100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+        }
+        .view-banner-updated {
+            font-size: 11px;
+            color: #64748b;
+        }
+        @media(max-width:600px){
+            .view-only-banner { flex-direction: column; align-items: flex-start; }
+            .view-banner-right { align-items: flex-start; }
+            .view-banner-title { font-size: 16px; }
+        }
 
         /* ===== PRINT-ONLY ELEMENTS (hidden on screen) ===== */
         .print-only{display:none;}
@@ -432,6 +527,30 @@
         </div>
     </div>
 
+    <!-- View-only mode banner — hidden when admin is logged in -->
+    <div class="view-only-banner" id="viewOnlyBanner">
+        <div class="view-banner-left">
+            <div class="view-banner-title">
+                📋 Duty Roster
+                <span class="view-banner-period" id="bannerPeriod">— Loading —</span>
+            </div>
+            <div class="view-banner-meta">
+                <span>⏰ <span id="bannerSiteTime">08:00 – 17:00</span></span>
+                <span class="meta-dot"></span>
+                <span>👥 <span id="bannerStaffCount">10</span> staff members</span>
+                <span class="meta-dot"></span>
+                <span>📅 <span id="bannerDaysCount">—</span> days</span>
+            </div>
+        </div>
+        <div class="view-banner-right">
+            <div class="view-banner-status">
+                <span class="status-pulse"></span>
+                Roster Published
+            </div>
+            <div class="view-banner-updated" id="bannerLastUpdated">—</div>
+        </div>
+    </div>
+
     <div class="controls">
         <div class="admin-only" style="display:flex; flex-wrap:wrap; gap:14px 20px; width:100%; margin-bottom:12px; align-items:center;">
             <div class="month-nav">
@@ -539,7 +658,7 @@
 <div class="modal-overlay" id="eventModal">
     <div class="modal">
         <div class="modal-title-row">
-            <h2>📌 Add Event / Conference</h2>
+            <h2 id="eventModalTitle">📌 Add Event / Conference</h2>
         </div>
         <div class="field">
             <label>Event Title *</label>
@@ -547,28 +666,32 @@
         </div>
         <div class="field-row">
             <div class="field">
-                <label>Date *</label>
-                <input type="date" id="eventDate" />
+                <label>Start Date *</label>
+                <input type="date" id="eventStartDate" />
             </div>
             <div class="field">
-                <label>Category</label>
-                <select id="eventCategory">
-                    <option value="general">📋 General</option>
-                    <option value="meeting">🤝 Meeting</option>
-                    <option value="training">📚 Training</option>
-                    <option value="conference">🌍 Conference</option>
-                    <option value="site">🏗️ Site Event</option>
-                    <option value="holiday">🎉 Holiday</option>
-                </select>
+                <label>End Date *</label>
+                <input type="date" id="eventEndDate" />
             </div>
+        </div>
+        <div class="field">
+            <label>Category</label>
+            <select id="eventCategory">
+                <option value="general">📋 General</option>
+                <option value="meeting">🤝 Meeting</option>
+                <option value="training">📚 Training</option>
+                <option value="conference">🌍 Conference</option>
+                <option value="site">🏗️ Site Event</option>
+                <option value="holiday">🎉 Holiday</option>
+            </select>
         </div>
         <div class="field-row">
             <div class="field">
-                <label>Start Time (optional)</label>
+                <label>Daily Start Time (optional)</label>
                 <input type="time" id="eventStartTime" />
             </div>
             <div class="field">
-                <label>End Time (optional)</label>
+                <label>Daily End Time (optional)</label>
                 <input type="time" id="eventEndTime" />
             </div>
         </div>
@@ -775,7 +898,8 @@ function saveToStorage() {
             endDate: END_DATE.toISOString(),
             roster, cellTime, events, eventIdCounter,
             globalSiteStart, globalSiteEnd,
-            adminSelectedYear, adminSelectedMonth
+            adminSelectedYear, adminSelectedMonth,
+            lastPublished: new Date().toISOString()
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         if (indicator) setTimeout(() => indicator.classList.remove('saving'), 250);
@@ -1116,12 +1240,20 @@ function render() {
     const searchTerm = memberSearchTerm.trim().toLowerCase();
 
     // Map "memberIdx_dateKey" -> array of event titles, for showing event-dots on the grid
+    // Events now span startDate → endDate (inclusive)
     const eventsByCell = {};
     events.forEach(ev => {
+        const evStart = dateFromKey(ev.startDate || ev.date || '');
+        const evEnd   = dateFromKey(ev.endDate   || ev.date || '');
+        if (!evStart || !evEnd) return;
         (ev.attendees || []).forEach(memberIdx => {
-            const k = `${memberIdx}_${ev.date}`;
-            if (!eventsByCell[k]) eventsByCell[k] = [];
-            eventsByCell[k].push(ev.title);
+            let d = new Date(evStart);
+            while (d <= evEnd) {
+                const k = `${memberIdx}_${formatDateKey(d)}`;
+                if (!eventsByCell[k]) eventsByCell[k] = [];
+                eventsByCell[k].push(ev.title);
+                d.setDate(d.getDate() + 1);
+            }
         });
     });
 
@@ -1237,12 +1369,20 @@ function renderDashboard(days, dateKeys, todayKey) {
         <div class="stat-card accent-off"><div class="stat-label">🛌 Off Today</div><div class="stat-value">${todayInRange ? off : '—'}</div></div>
         <div class="stat-card accent-sick"><div class="stat-label">🤒 Sick Today</div><div class="stat-value">${todayInRange ? sick : '—'}</div></div>
         <div class="stat-card accent-ph"><div class="stat-label">📋 On Leave Today</div><div class="stat-value">${todayInRange ? onLeave : '—'}</div></div>
-        <div class="stat-card"><div class="stat-label">📌 Events This Period</div><div class="stat-value">${events.filter(e => dateKeys.includes(e.date)).length}</div></div>
+        <div class="stat-card"><div class="stat-label">📌 Events This Period</div><div class="stat-value">${events.filter(e => {
+            const es = dateFromKey(e.startDate || e.date || '');
+            const ee = dateFromKey(e.endDate   || e.date || '');
+            return es && ee && ee >= START_DATE && es <= END_DATE;
+        }).length}</div></div>
     `;
 
     const printSummary = document.getElementById('printSummary');
     if (printSummary) {
-        printSummary.innerHTML = `<span>Total Staff: ${total}</span><span>Total OFF-days: ${totalOffPeriod}</span><span>Total SICK-days: ${totalSickPeriod}</span><span>Events: ${events.filter(e => dateKeys.includes(e.date)).length}</span>`;
+        printSummary.innerHTML = `<span>Total Staff: ${total}</span><span>Total OFF-days: ${totalOffPeriod}</span><span>Total SICK-days: ${totalSickPeriod}</span><span>Events: ${events.filter(e => {
+            const es = dateFromKey(e.startDate || e.date || '');
+            const ee = dateFromKey(e.endDate   || e.date || '');
+            return es && ee && ee >= START_DATE && es <= END_DATE;
+        }).length}</span>`;
     }
 }
 
@@ -1251,33 +1391,54 @@ const CATEGORY_ICONS = { general:'📋', meeting:'🤝', training:'📚', confer
 function renderEvents() {
     const container = document.getElementById('eventsList');
     const visibleEvents = events.filter(e => {
-        const evDate = dateFromKey(e.date);
-        return evDate >= START_DATE && evDate <= END_DATE;
+        // Support both old single-date and new startDate/endDate format
+        const evStart = dateFromKey(e.startDate || e.date || '');
+        const evEnd   = dateFromKey(e.endDate   || e.date || '');
+        if (!evStart) return false;
+        // Show if event overlaps with current visible range
+        return evEnd >= START_DATE && evStart <= END_DATE;
     });
 
     if (visibleEvents.length === 0) {
         container.innerHTML = `<div style="color:#94a3b8;font-size:14px;padding:8px 0;">No events scheduled in this period.</div>`;
         return;
     }
-    const sorted = [...visibleEvents].sort((a,b) => a.date.localeCompare(b.date));
+    const sorted = [...visibleEvents].sort((a,b) => (a.startDate||a.date||'').localeCompare(b.startDate||b.date||''));
     let html = '';
     sorted.forEach(ev => {
-        const d = dateFromKey(ev.date);
-        const label = `${d.getDate()} ${DAY_NAMES[d.getDay()]}`;
-        const icon  = CATEGORY_ICONS[ev.category] || '📋';
+        const startKey = ev.startDate || ev.date || '';
+        const endKey   = ev.endDate   || ev.date || '';
+        const dStart = dateFromKey(startKey);
+        const dEnd   = dateFromKey(endKey);
+
+        const fmtDate = d => `${d.getDate()} ${DAY_NAMES[d.getDay()]}`;
+        const dateLabel = (startKey === endKey)
+            ? fmtDate(dStart)
+            : `${fmtDate(dStart)} – ${fmtDate(dEnd)}`;
+
+        const icon    = CATEGORY_ICONS[ev.category] || '📋';
         const timeStr = (ev.startTime && ev.endTime) ? `${ev.startTime}–${ev.endTime}` : (ev.startTime || '');
-        
+
         let attendeesHtml = '';
         if (ev.attendees && ev.attendees.length > 0) {
             const names = ev.attendees.map(idx => MEMBERS[idx]).join(', ');
             attendeesHtml = `<div class="event-attendees">👥 Assigned: ${names}</div>`;
         }
 
-        // Hide delete button from viewers via admin-only class
+        // Duration label for multi-day
+        let durationHtml = '';
+        if (startKey !== endKey) {
+            const diffMs = dEnd - dStart;
+            const days = Math.round(diffMs / (1000*60*60*24)) + 1;
+            durationHtml = `<span style="font-size:11px;color:var(--text-muted);margin-left:6px;">(${days} days)</span>`;
+        }
+
         html += `<div class="event-card">
-            <button class="event-del admin-only" data-event-id="${ev.id}">✕</button>
+            <button class="event-edit admin-only" data-event-id="${ev.id}" title="Edit event">✏️</button>
+            <button class="event-del admin-only" data-event-id="${ev.id}" title="Delete event">✕</button>
             <div class="event-header">
-                <span class="event-date">${label}</span>
+                <span class="event-date-range">${escHtml(dateLabel)}</span>
+                ${durationHtml}
                 ${timeStr ? `<span class="event-time-badge">⏰ ${timeStr}</span>` : ''}
             </div>
             <div>
@@ -1289,12 +1450,24 @@ function renderEvents() {
         </div>`;
     });
     container.innerHTML = html;
+
+    // Delete handlers
     container.querySelectorAll('.event-del').forEach(btn => {
         btn.addEventListener('click', function() {
-            if (!isAdmin) return; // double check
+            if (!isAdmin) return;
             const id = Number(this.dataset.eventId);
+            if (!confirm('Delete this event?')) return;
             events = events.filter(e => e.id !== id);
             render();
+        });
+    });
+
+    // Edit handlers
+    container.querySelectorAll('.event-edit').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (!isAdmin) return;
+            const id = Number(this.dataset.eventId);
+            openEventModalForEdit(id);
         });
     });
 }
@@ -1775,38 +1948,77 @@ document.getElementById('exportPDF').addEventListener('click', function() {
 
 // ---- Event Modal ----
 const eventModal = document.getElementById('eventModal');
-document.getElementById('openEventModal').addEventListener('click', function() {
+let editingEventId = null; // null = adding new, number = editing existing
+
+function openEventModalForAdd() {
+    editingEventId = null;
     const firstDay = getDaysArray()[0];
-    document.getElementById('eventDate').value = formatDateKey(firstDay);
-    document.getElementById('eventTitle').value = '';
-    document.getElementById('eventDesc').value  = '';
+    const firstKey = formatDateKey(firstDay);
+    document.getElementById('eventModalTitle').textContent = '📌 Add Event / Conference';
+    document.getElementById('saveEvent').textContent = 'Save Event';
+    document.getElementById('eventStartDate').value = firstKey;
+    document.getElementById('eventEndDate').value   = firstKey;
+    document.getElementById('eventTitle').value     = '';
+    document.getElementById('eventDesc').value      = '';
     document.getElementById('eventStartTime').value = '';
     document.getElementById('eventEndTime').value   = '';
     document.getElementById('eventCategory').value  = 'general';
     document.querySelectorAll('.attendee-cb').forEach(cb => cb.checked = false);
-
     eventModal.classList.add('active');
-});
+}
+
+function openEventModalForEdit(id) {
+    const ev = events.find(e => e.id === id);
+    if (!ev) return;
+    editingEventId = id;
+    document.getElementById('eventModalTitle').textContent = '✏️ Edit Event';
+    document.getElementById('saveEvent').textContent = 'Update Event';
+    document.getElementById('eventStartDate').value = ev.startDate || ev.date || '';
+    document.getElementById('eventEndDate').value   = ev.endDate   || ev.date || '';
+    document.getElementById('eventTitle').value     = ev.title     || '';
+    document.getElementById('eventDesc').value      = ev.desc      || '';
+    document.getElementById('eventStartTime').value = ev.startTime || '';
+    document.getElementById('eventEndTime').value   = ev.endTime   || '';
+    document.getElementById('eventCategory').value  = ev.category  || 'general';
+    document.querySelectorAll('.attendee-cb').forEach(cb => {
+        cb.checked = (ev.attendees || []).includes(Number(cb.value));
+    });
+    eventModal.classList.add('active');
+}
+
+document.getElementById('openEventModal').addEventListener('click', openEventModalForAdd);
 document.getElementById('closeEventModal').addEventListener('click', () => eventModal.classList.remove('active'));
 eventModal.addEventListener('click', e => { if (e.target===eventModal) eventModal.classList.remove('active'); });
 loginModal.addEventListener('click', e => { if (e.target===loginModal) loginModal.classList.remove('active'); });
 
 document.getElementById('saveEvent').addEventListener('click', function() {
-    const title     = document.getElementById('eventTitle').value.trim();
-    const date      = document.getElementById('eventDate').value;
-    const desc      = document.getElementById('eventDesc').value.trim();
-    const startTime = document.getElementById('eventStartTime').value;
-    const endTime   = document.getElementById('eventEndTime').value;
-    const category  = document.getElementById('eventCategory').value;
+    const title      = document.getElementById('eventTitle').value.trim();
+    const startDate  = document.getElementById('eventStartDate').value;
+    const endDate    = document.getElementById('eventEndDate').value;
+    const desc       = document.getElementById('eventDesc').value.trim();
+    const startTime  = document.getElementById('eventStartTime').value;
+    const endTime    = document.getElementById('eventEndTime').value;
+    const category   = document.getElementById('eventCategory').value;
     const selectedAttendees = Array.from(document.querySelectorAll('.attendee-cb:checked')).map(cb => Number(cb.value));
 
-    if (!title) { alert('Please enter an event title.'); return; }
-    if (!date)  { alert('Please select a date.'); return; }
-    
-    events.push({ 
-        id: ++eventIdCounter, date, title, desc, startTime, endTime, category, attendees: selectedAttendees 
-    });
-    
+    if (!title)     { alert('Please enter an event title.'); return; }
+    if (!startDate) { alert('Please select a start date.'); return; }
+    if (!endDate)   { alert('Please select an end date.'); return; }
+    if (endDate < startDate) { alert('End date must be on or after the start date.'); return; }
+
+    if (editingEventId !== null) {
+        // Update existing event
+        const idx = events.findIndex(e => e.id === editingEventId);
+        if (idx !== -1) {
+            events[idx] = { ...events[idx], startDate, endDate, title, desc, startTime, endTime, category, attendees: selectedAttendees };
+        }
+        showToast('Event updated', 'success');
+    } else {
+        // Add new event
+        events.push({ id: ++eventIdCounter, startDate, endDate, title, desc, startTime, endTime, category, attendees: selectedAttendees });
+        showToast('Event added', 'success');
+    }
+
     eventModal.classList.remove('active');
     render();
 });
@@ -1844,8 +2056,11 @@ function demoFill() {
     // Demo events
     const d1 = getDaysArray()[5];
     const d2 = getDaysArray()[18];
-    events.push({ id:++eventIdCounter, date:formatDateKey(d1), title:'AV Systems Integration Conference', desc:'Rwenzori Conference Centre', startTime:'09:00', endTime:'17:00', category:'conference', attendees:[7] });
-    events.push({ id:++eventIdCounter, date:formatDateKey(d2), title:'Safety Training', desc:'New safety protocols', startTime:'09:00', endTime:'12:00', category:'training', attendees:[0, 2, 4] });
+    const d3 = getDaysArray()[10];
+    events.push({ id:++eventIdCounter, startDate:formatDateKey(d1), endDate:formatDateKey(d1), title:'AV Systems Integration Conference', desc:'Rwenzori Conference Centre', startTime:'09:00', endTime:'17:00', category:'conference', attendees:[7] });
+    events.push({ id:++eventIdCounter, startDate:formatDateKey(d2), endDate:formatDateKey(d2), title:'Safety Training', desc:'New safety protocols', startTime:'09:00', endTime:'12:00', category:'training', attendees:[0, 2, 4] });
+    // Multi-day demo event
+    events.push({ id:++eventIdCounter, startDate:formatDateKey(d3), endDate:formatDateKey(new Date(d3.getFullYear(), d3.getMonth(), d3.getDate()+2)), title:'Site Inspection Visit', desc:'3-day inspection tour', startTime:'08:00', endTime:'16:00', category:'site', attendees:[1, 3] });
 }
 
 // Load order: local browser storage first (fastest, always available offline).

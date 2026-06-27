@@ -1806,12 +1806,25 @@
       "attendees": [
         2
       ]
+    },
+    {
+      "id": 4,
+      "date": "2026-06-27",
+      "title": "STI",
+      "desc": "Conference",
+      "startTime": "08:00",
+      "endTime": "21:00",
+      "category": "conference",
+      "attendees": [
+        2,
+        6
+      ]
     }
   ],
-  "eventIdCounter": 3,
+  "eventIdCounter": 4,
   "globalSiteStart": "08:00",
   "globalSiteEnd": "17:00",
   "adminSelectedYear": 2026,
   "adminSelectedMonth": 5,
-  "_syncedAt": "2026-06-27T12:24:18.453Z"
+  "_syncedAt": "2026-06-27T12:27:31.671Z"
 }

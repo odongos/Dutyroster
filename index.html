@@ -82,9 +82,6 @@
         .search-clear{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-faint);font-size:14px;display:none;}
         .search-wrap.has-value .search-clear{display:block;}
 
-        .dept-filter-select{padding:7px 12px;border:1.5px solid var(--border-strong);border-radius:8px;font-size:13px;font-weight:600;background:var(--card-bg);color:var(--text);cursor:pointer;}
-        .dept-filter-select:focus{outline:none;border-color:#6366f1;}
-
         /* ===== DASHBOARD STATS ===== */
         .dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:24px;}
         .stat-card{background:var(--controls-bg);border:1px solid var(--border);border-radius:14px;padding:14px 16px;transition:0.2s;}
@@ -127,7 +124,8 @@
         .cell-status.ph{background:#dbeafe;color:#1e40af;}
         .cell-status.sick{background:#fecaca;color:#991b1b;}
         .cell-status.abp{background:#e0e7ff;color:#3730a3;}
-        .cell-status.al{background:#ccfbf1;color:#0f766e;}
+        .cell-status.al{background:#d1fae5;color:#065f46;font-weight:800;}
+        .cell-status.abs{background:#fee2e2;color:#7f1d1d;font-weight:800;}
 
         /* ===== CELL TIME DISPLAY ===== */
         .cell-time{display:block;font-size:9px;color:#64748b;font-weight:500;margin-top:1px;line-height:1.2;}
@@ -148,29 +146,11 @@
         .month-picker-grid button.active-month{background:#4338ca;color:#fff;border-color:#4338ca;}
         .month-picker-grid button.current-month-marker{box-shadow:inset 0 0 0 2px #059669;}
 
-        /* ===== STAFF MANAGEMENT ===== */
-        .staff-list{max-height:280px;overflow-y:auto;border:1.5px solid var(--border-strong);border-radius:10px;margin-bottom:16px;}
-        .staff-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);}
-        .staff-row:last-child{border-bottom:none;}
-        .staff-row-info{flex:1;display:flex;gap:8px;flex-wrap:wrap;}
-        .staff-row-info input{flex:1;min-width:100px;padding:6px 10px;border:1.5px solid var(--border-strong);border-radius:8px;font-size:12.5px;background:var(--card-bg);color:var(--text);}
-        .staff-row-info input:focus{outline:none;border-color:#6366f1;}
-        .staff-row-actions{display:flex;gap:6px;flex-shrink:0;}
-        .staff-row-actions .icon-btn{width:30px;height:30px;font-size:13px;}
-        .staff-empty{padding:16px;color:var(--text-faint);font-size:13px;text-align:center;}
-
-        /* ===== DEPARTMENT CHIPS ===== */
-        .dept-chip-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
-        .dept-chip{display:flex;align-items:center;gap:6px;background:var(--row-hover);border:1px solid var(--border-strong);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--text);}
-        .dept-chip .dept-chip-remove{cursor:pointer;color:var(--text-faint);font-size:13px;border:none;background:none;padding:0;line-height:1;}
-        .dept-chip .dept-chip-remove:hover{color:#dc2626;}
-
         /* ===== EVENT DOT on roster cells ===== */
         .event-dot{position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:#4338ca;box-shadow:0 0 0 2px var(--card-bg);}
         body.dark-mode .event-dot{background:#818cf8;}
 
         /* ===== OFF COUNTER ===== */
-        .member-dept{font-size:10.5px;color:var(--text-faint);font-weight:500;}
         .off-counter{font-size:10px;color:var(--text-muted);font-weight:400;margin-left:6px;background:var(--row-hover);padding:0 8px;border-radius:12px;display:inline-block;}
         .off-warning{color:#dc2626;font-weight:700;}
         .off-ok{color:#059669;}
@@ -185,7 +165,8 @@
         .legend-item .swatch.ph{background:#dbeafe;}
         .legend-item .swatch.sick{background:#fecaca;}
         .legend-item .swatch.abp{background:#e0e7ff;}
-        .legend-item .swatch.al{background:#ccfbf1;}
+        .legend-item .swatch.al{background:#d1fae5;}
+        .legend-item .swatch.abs{background:#fee2e2;}
 
         /* ===== EVENTS SECTION ===== */
         .events-section{margin-top:20px;border-top:2px solid var(--border);padding-top:20px;}
@@ -241,10 +222,10 @@
         .toast.error{background:#dc2626;}
 
         /* ===== CELL POPUP (status + time) ===== */
-        .status-popup{display:none;position:absolute;z-index:200;background:var(--card-bg);border-radius:14px;box-shadow:0 16px 48px var(--shadow);padding:0;min-width:200px;border:1px solid var(--border);top:100%;left:50%;transform:translateX(-50%);overflow:hidden;}
+        .status-popup{display:none;position:absolute;z-index:200;background:var(--card-bg);border-radius:14px;box-shadow:0 16px 48px var(--shadow);padding:0;min-width:230px;border:1px solid var(--border);top:100%;left:50%;transform:translateX(-50%);overflow:hidden;}
         .status-popup.active{display:block;}
         .popup-section-title{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;padding:8px 12px 4px;background:var(--controls-bg);border-bottom:1px solid var(--border);}
-        .popup-status-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;padding:6px 8px;}
+        .popup-status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;padding:6px 8px;}
         .status-popup .popup-btn{display:flex;align-items:center;gap:6px;width:100%;padding:5px 8px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;text-align:left;transition:0.1s;background:transparent;margin:2px 0;color:var(--text);}
         .status-popup .popup-btn:hover{background:var(--row-hover);}
         .status-popup .popup-btn .badge{display:inline-block;width:12px;height:12px;border-radius:3px;flex-shrink:0;}
@@ -253,7 +234,8 @@
         .status-popup .popup-btn.ph .badge{background:#dbeafe;border:1px solid #3b82f6;}
         .status-popup .popup-btn.sick .badge{background:#fecaca;border:1px solid #ef4444;}
         .status-popup .popup-btn.abp .badge{background:#e0e7ff;border:1px solid #6366f1;}
-        .status-popup .popup-btn.al .badge{background:#ccfbf1;border:1px solid #0d9488;}
+        .status-popup .popup-btn.al .badge{background:#d1fae5;border:1px solid #10b981;}
+        .status-popup .popup-btn.abs .badge{background:#fee2e2;border:1px solid #ef4444;}
         .status-popup .popup-btn.clear .badge{background:transparent;border:1.5px dashed #94a3b8;}
         .popup-divider{border:none;border-top:1px solid var(--border);margin:0;}
         .popup-time-section{padding:8px 12px 10px;}
@@ -291,70 +273,40 @@
         .print-only{display:none;}
 
         /* ===== RESPONSIVE ===== */
-        .roster-wrapper{-webkit-overflow-scrolling:touch;}
-        .scroll-hint{display:none;font-size:11px;color:var(--text-muted);text-align:center;padding:6px 0 2px;}
-
-        @media(max-width:900px){
-            .month-nav{flex-wrap:wrap;}
-        }
-
         @media(max-width:768px){
             body{padding:8px;}
-            .container{padding:14px 10px;border-radius:14px;}
-            .header{flex-direction:column;align-items:stretch;gap:10px;}
-            .header-left h1{font-size:19px;}
-            .header-right{gap:8px;width:100%;justify-content:flex-start;}
-            .header-right .site-time-display{order:5;}
-
-            .controls{flex-direction:column;align-items:stretch;padding:12px 14px;}
-            .controls label{flex-wrap:wrap;width:100%;}
-            .controls .btn{width:100%;text-align:center;}
+            .container{padding:12px 10px;border-radius:14px;}
+            .header{flex-direction:column;align-items:flex-start;gap:8px;}
+            .header-left h1{font-size:18px;}
+            .header-right{gap:6px;width:100%;flex-wrap:wrap;}
+            .controls{flex-direction:column;align-items:stretch;gap:10px;padding:12px;}
+            .controls label{flex-wrap:wrap;gap:6px;}
             .controls input[type="text"],.controls input[type="time"], .controls input[type="date"]{width:100%;}
-
-            .month-nav{width:100%;justify-content:space-between;}
-            .month-nav #monthPickerBtn{flex:1;}
-            .month-picker-popup{left:50%;transform:translateX(-50%);}
-
-            #customRangeRow{flex-direction:column;align-items:stretch !important;width:100%;}
-            #customRangeRow input{width:100%;margin-bottom:6px;}
-
-            .search-wrap{max-width:100%;flex:1 1 100%;}
-            .dept-filter-select{width:100%;}
-
-            .scroll-hint{display:block;}
-            .roster-wrapper tbody td:first-child{min-width:118px;font-size:11px;padding-left:8px;}
-            .roster-wrapper table{font-size:11px;min-width:900px;}
-            .roster-wrapper tbody td{min-width:46px;height:44px;}
-
-            .modal{padding:22px 18px;max-height:88vh;overflow-y:auto;}
+            .search-wrap{max-width:100%;}
+            .roster-wrapper tbody td:first-child{min-width:130px;font-size:11px;padding-left:8px;}
+            .roster-wrapper table{font-size:11px;min-width:800px;}
             .modal .field-row{grid-template-columns:1fr;}
-            .modal .modal-actions{flex-wrap:wrap;}
-            .modal .modal-actions .btn{flex:1 1 auto;}
-
-            .dashboard{grid-template-columns:repeat(2,1fr);}
-            .legend{gap:8px 14px;}
-            .legend span[style*="margin-left:auto"]{margin-left:0 !important;width:100%;}
-
-            .event-card{min-width:100%;}
-
-            .status-popup{position:fixed;top:auto;bottom:16px;left:50%;right:auto;transform:translateX(-50%);width:88vw;max-width:320px;}
-            .popup-status-grid{grid-template-columns:1fr 1fr 1fr;}
-
-            .staff-row{flex-wrap:wrap;}
-            .staff-row-info{flex-basis:100%;}
+            .dashboard{grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;}
+            .legend{gap:8px 14px;padding:10px 12px;}
+            .legend-item{font-size:12px;}
+            .month-nav{flex-wrap:wrap;gap:4px;}
+            .month-nav .icon-btn{width:30px;height:30px;}
+            .events-list{flex-direction:column;}
+            .event-card{min-width:unset;width:100%;}
+            .modal{padding:20px 18px;}
+            .controls .btn{padding:8px 12px;font-size:12px;}
+            .admin-only.month-nav-row{display:flex;flex-direction:column;gap:8px;}
         }
         @media(max-width:480px){
-            .container{padding:10px 6px;}
-            .header-left h1{font-size:17px;}
-            .roster-wrapper tbody td:first-child{min-width:96px;font-size:10px;padding-left:5px;}
-            .roster-wrapper table{min-width:760px;font-size:10px;}
-            .toast-container{left:12px;right:12px;bottom:12px;align-items:stretch;}
-            .toast{max-width:100%;}
-            .dashboard{grid-template-columns:repeat(2,1fr);gap:8px;}
-            .stat-card{padding:10px 12px;}
-            .stat-card .stat-value{font-size:19px;}
-            .icon-btn{width:34px;height:34px;}
-            .popup-status-grid{grid-template-columns:1fr 1fr;}
+            body{padding:4px;}
+            .container{padding:8px 6px;border-radius:10px;}
+            .header-left h1{font-size:16px;}
+            .roster-wrapper tbody td:first-child{min-width:100px;font-size:10px;padding-left:6px;}
+            .roster-wrapper table{min-width:600px;font-size:10px;}
+            .toast-container{left:8px;right:8px;bottom:8px;align-items:stretch;}
+            .toast{max-width:100%;font-size:12px;}
+            .stat-card .stat-value{font-size:20px;}
+            .month-picker-popup{width:200px;}
         }
 
        /* ===== PRINT / PDF EXPORT STYLES (A3 Landscape - Uniform Grid) ===== */
@@ -388,9 +340,9 @@
             .print-header .print-meta{font-size:10px;color:#475569;text-align:right;line-height:1.5;}
             .print-summary{display:flex !important;gap:18px;margin-bottom:14px;font-size:10px;color:#0f172a;flex-wrap:wrap;}
             .print-summary span{font-weight:700;}
-            .print-legend{display:flex !important;flex-wrap:wrap;gap:10px 18px;margin-bottom:12px;font-size:9px;color:#1e293b;}
+            .print-legend{display:flex !important;flex-wrap:wrap;gap:10px 18px;margin-bottom:8px;font-size:9px;color:#1e293b;}
             .print-legend .swatch{width:10px;height:10px;border:1px solid #94a3b8;display:inline-block;vertical-align:middle;margin-right:4px;}
-            .print-disclaimer{display:block !important;background:#fef2f2;border:1.5px solid #fecaca;border-radius:8px;padding:10px 14px;margin-top:18px;margin-bottom:18px;font-size:10px;color:#991b1b;line-height:1.5;}
+            .print-roster-note{display:block !important;font-size:9px;color:#64748b;font-style:italic;margin-bottom:12px;border-left:3px solid #94a3b8;padding-left:8px;}
             .print-signatures{display:flex !important;justify-content:space-between;margin-top:36px;gap:40px;}
             .print-signatures .sig-block{flex:1;border-top:1px solid #475569;padding-top:6px;font-size:10px;color:#334155;}
 
@@ -402,11 +354,11 @@
 
             .roster-wrapper table { 
                 width: 100% !important; 
-                table-layout: fixed !important; /* Forces all columns to be equal width */
+                table-layout: fixed !important;
                 border-collapse: collapse !important;
             }
 
-            /* Unifying all cells: Names and Dates now share the same settings */
+            /* Unifying all cells */
             td, th { 
                 -webkit-print-color-adjust: exact !important; 
                 print-color-adjust: exact !important; 
@@ -419,52 +371,14 @@
                 color:#0f172a !important;
             }
 
-            /* Specific adjustment to ensure names aren't squashed */
+            /* Member column fixed at 250px */
             .roster-wrapper tbody td:first-child,
             .roster-wrapper thead th:first-child {
                 text-align: left !important;
                 padding-left: 6px !important;
-                min-width: 140px !important;
-                width: auto !important;
-            }
-
-            /* Style member names and department in print */
-            .roster-wrapper tbody td:first-child {
-                font-size: 9px !important;
-                padding: 4px 6px !important;
-                line-height: 1.2;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            /* Member name - bold, inline */
-            .roster-wrapper tbody td:first-child strong {
-                display: inline;
-                font-weight: 700;
-                color: #0f172a;
-            }
-
-            /* Member department - lighter color, inline */
-            .roster-wrapper tbody td:first-child .member-dept {
-                display: inline;
-                color: #64748b;
-                font-size: 8px;
-                font-weight: 400;
-                margin-left: 2px;
-                margin-right: 4px;
-            }
-
-            /* Off counter - inline badge style */
-            .roster-wrapper tbody td:first-child .off-counter {
-                display: inline-block;
-                background: #d1fae5 !important;
-                color: #0d7377 !important;
-                padding: 1px 4px !important;
-                border-radius: 8px;
-                font-size: 8px !important;
-                font-weight: 600;
-            }
+                width: 250px !important;
+                min-width: 250px !important;
+                max-width: 250px !important;
             }
 
             .roster-wrapper thead tr:first-child th, .roster-wrapper thead tr:last-child th{
@@ -476,6 +390,15 @@
             .events-section { display: block !important; margin-top: 30px; }
             .event-card { break-inside: avoid; border: 1px solid #e9edf2; margin-bottom: 10px; padding: 10px; background:white !important; }
             .event-del { display: none !important; }
+            
+            /* Status colors for print */
+            .cell-status.off{background:#1e293b !important;color:#fff !important;}
+            .cell-status.po{background:#fef9c3 !important;color:#854d0e !important;}
+            .cell-status.ph{background:#dbeafe !important;color:#1e40af !important;}
+            .cell-status.sick{background:#fecaca !important;color:#991b1b !important;}
+            .cell-status.abp{background:#e0e7ff !important;color:#3730a3 !important;}
+            .cell-status.al{background:#d1fae5 !important;color:#065f46 !important;}
+            .cell-status.abs{background:#fee2e2 !important;color:#7f1d1d !important;}
         }
     </style>
 </head>
@@ -549,12 +472,7 @@
                 <input type="text" id="memberSearch" placeholder="Search staff name…" />
                 <button class="search-clear" id="searchClear" title="Clear search">✕</button>
             </div>
-            <select id="departmentFilterSelect" class="dept-filter-select">
-                <option value="all">All Departments</option>
-            </select>
-            <button class="btn btn-success admin-only" id="openStaffBtn">👤 Manage Staff</button>
             <button class="btn btn-success admin-only" id="openEventModal">➕ Add Event</button>
-            <button class="btn btn-outline admin-only" id="generateRosterBtn">📋 Generate Roster</button>
             <button class="btn btn-outline admin-only" id="resetRoster">🔄 Reset All</button>
             <button class="btn btn-dark admin-only" id="saveDataBtn">💾 Save Roster File</button>
             
@@ -578,6 +496,7 @@
         <span class="legend-item"><span class="swatch sick"></span> SICK · Sick Leave</span>
         <span class="legend-item"><span class="swatch abp"></span> ABP · Absent w/ Permission</span>
         <span class="legend-item"><span class="swatch al"></span> AL · Annual Leave</span>
+        <span class="legend-item"><span class="swatch abs"></span> ABS · Absent</span>
         <span style="font-size:12px;color:var(--text-muted);margin-left:auto;">⚡ 1 off per week required</span>
     </div>
 
@@ -586,14 +505,15 @@
     <div class="print-legend print-only">
         <span><span class="swatch" style="background:transparent;"></span>Working</span>
         <span><span class="swatch" style="background:#1e293b;"></span>OFF</span>
-        <span><span class="swatch" style="background:#fef9c3;"></span>PO</span>
-        <span><span class="swatch" style="background:#dbeafe;"></span>PH</span>
-        <span><span class="swatch" style="background:#fecaca;"></span>SICK</span>
-        <span><span class="swatch" style="background:#e0e7ff;"></span>ABP</span>
-        <span><span class="swatch" style="background:#ccfbf1;"></span>AL</span>
+        <span><span class="swatch" style="background:#fef9c3;"></span>PO · Pending Off</span>
+        <span><span class="swatch" style="background:#dbeafe;"></span>PH · Public Holiday</span>
+        <span><span class="swatch" style="background:#fecaca;"></span>SICK · Sick Leave</span>
+        <span><span class="swatch" style="background:#e0e7ff;"></span>ABP · Absent w/ Permission</span>
+        <span><span class="swatch" style="background:#d1fae5;"></span>AL · Annual Leave</span>
+        <span><span class="swatch" style="background:#fee2e2;"></span>ABS · Absent</span>
     </div>
+    <div class="print-roster-note print-only">⚠️ Note: This duty roster is subject to change based on available programme and operational requirements. Please confirm with the supervisor for any last-minute adjustments.</div>
 
-    <div class="scroll-hint">👉 Swipe sideways to see more days</div>
     <div class="roster-wrapper" id="rosterWrapper">
         <table id="rosterTable">
             <thead id="tableHead"></thead>
@@ -606,11 +526,6 @@
         <div class="events-list" id="eventsList">
             <div style="color:var(--text-faint);font-size:14px;padding:8px 0;">No events scheduled yet.</div>
         </div>
-    </div>
-
-    <!-- Print-only disclaimer -->
-    <div class="print-disclaimer print-only">
-        <strong>⚠️ IMPORTANT NOTE:</strong> This roster is subject to change based on available programs, events, and operational requirements. Staff should confirm their scheduled duties with management before each shift.
     </div>
 
     <!-- Print-only sign-off block -->
@@ -775,43 +690,6 @@
     </div>
 </div>
 
-<div class="modal-overlay" id="staffModal">
-    <div class="modal" style="max-width: 560px;">
-        <div class="modal-title-row">
-            <h2>👤 Manage Staff</h2>
-        </div>
-
-        <div class="field-hint" style="font-weight:700;color:var(--text-strong);margin-bottom:8px;">🏨 Departments</div>
-        <div class="dept-chip-list" id="deptChipList"></div>
-        <div style="display:flex;gap:8px;margin-bottom:18px;">
-            <input type="text" id="newDeptName" placeholder="e.g. Spa &amp; Wellness" style="flex:1;padding:8px 14px;border:1.5px solid var(--border-strong);border-radius:10px;font-size:13px;background:var(--card-bg);color:var(--text);" />
-            <button class="btn btn-primary" id="addDeptBtn">➕ Add Department</button>
-        </div>
-
-        <div class="field-hint" style="font-weight:700;color:var(--text-strong);margin-bottom:8px;">Staff</div>
-        <div class="field-hint" style="margin-bottom:12px;">
-            Add staff from any department of the hotel. Removing someone deletes their schedule history for every month.
-        </div>
-        <div class="staff-list" id="staffList"></div>
-
-        <div class="field-row">
-            <div class="field">
-                <label>Name</label>
-                <input type="text" id="newMemberName" placeholder="Full name" />
-            </div>
-            <div class="field">
-                <label>Department</label>
-                <input type="text" id="newMemberDept" placeholder="e.g. Housekeeping" list="departmentSuggestions" />
-            </div>
-        </div>
-        <datalist id="departmentSuggestions"></datalist>
-        <div class="modal-actions" style="justify-content:space-between;">
-            <button class="btn btn-secondary" id="closeStaffModal">Close</button>
-            <button class="btn btn-success" id="addMemberBtn">➕ Add Member</button>
-        </div>
-    </div>
-</div>
-
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
@@ -821,61 +699,27 @@
 
 let isAdmin = false; // By default, system is in View Mode
 
-// Members are stored as { id, name, department } so adding/removing staff never
-// shifts another member's existing schedule data (which is keyed by stable id).
-let MEMBERS = [
-    { id: 0, name: "GALABUZI JOSEPH",        department: "Audio Visual" },
-    { id: 1, name: "MUBIRU ABDUL HAKIM",      department: "Audio Visual" },
-    { id: 2, name: "ATWINE SCOTT",            department: "Audio Visual" },
-    { id: 3, name: "KATENDE MOSES",           department: "Audio Visual" },
-    { id: 4, name: "NDAWULA DERRICK",         department: "Audio Visual" },
-    { id: 5, name: "BOGERE ALEX",             department: "Audio Visual" },
-    { id: 6, name: "BHIMJI MAVJI BHUDHIYA",   department: "Audio Visual" },
-    { id: 7, name: "ODONGO STEPHEN",          department: "Audio Visual" },
-    { id: 8, name: "NGIRABAKAUNZI ALEX",      department: "Audio Visual" },
-    { id: 9, name: "VINCENT KALIBBALA",       department: "Audio Visual" }
+const MEMBERS = [
+    "GALABUZI JOSEPH",
+    "MUBIRU ABDUL HAKIM",
+    "ATWINE SCOTT",
+    "KATENDE MOSES",
+    "NDAWULA DERRICK",
+    "BOGERE ALEX",
+    "BHIMJI MAVJI BHUDHIYA",
+    "ODONGO STEPHEN",
+    "NGIRABAKAUNZI ALEX",
+    "VINCENT KALIBBALA"
 ];
-let nextMemberId = MEMBERS.length;
-
-// Suggested departments across a typical hospitality property (admin can also type/add a custom one)
-const DEFAULT_DEPARTMENTS = [
-    "Audio Visual", "Front Office", "Housekeeping", "Food & Beverage",
-    "Kitchen / Culinary", "Engineering & Maintenance", "Security",
-    "Spa & Wellness", "Sales & Events", "Concierge", "Human Resources", "Finance & Accounts"
-];
-let customDepartments = []; // departments the admin has explicitly added, beyond the defaults
-let departmentFilter = 'all';
-
-// Published/Generated Roster — what gets shown in view-only mode
-// Separate from the working roster so admin can edit future months without changing what viewers see
-let publishedRoster = null; // { startDate, endDate, roster, cellTime, events, members, customDepartments, generatedAt }
-
-function getMemberById(id) { return MEMBERS.find(m => m.id === id); }
-function getMemberName(id) { const m = getMemberById(id); return m ? m.name : '(removed member)'; }
-function getUsedDepartments() {
-    return Array.from(new Set(MEMBERS.map(m => m.department || 'Unassigned'))).sort();
-}
-function getFilterableDepartments() {
-    const set = new Set(customDepartments);
-    MEMBERS.forEach(m => set.add(m.department || 'Unassigned'));
-    return Array.from(set).sort();
-}
-function getDepartmentSuggestions() {
-    const set = new Set(DEFAULT_DEPARTMENTS);
-    customDepartments.forEach(d => set.add(d));
-    MEMBERS.forEach(m => set.add(m.department || 'Unassigned'));
-    return Array.from(set).sort();
-}
-function escAttr(str) { return String(str).replace(/"/g, '&quot;'); }
 
 let START_DATE = new Date(new Date().getFullYear(), new Date().getMonth(), 1); // 1st of current month
 let END_DATE   = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0); // last day of current month
 
 const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-// Statuses: '' = working, 'off' = OFF day, 'po', 'ph', 'sick', 'abp'
-const STATUSES = ['off','po','ph','sick','abp','al'];
-const STATUS_LABELS = { off:'OFF', po:'PO', ph:'PH', sick:'SICK', abp:'ABP', al:'AL' };
+// Statuses: '' = working, 'off' = OFF day, 'po', 'ph', 'sick', 'abp', 'al' = Annual Leave, 'abs' = Absent
+const STATUSES = ['off','po','ph','sick','abp','al','abs'];
+const STATUS_LABELS = { off:'OFF', po:'PO', ph:'PH', sick:'SICK', abp:'ABP', al:'AL', abs:'ABS' };
 
 let roster   = {};   
 let cellTime = {};   
@@ -884,6 +728,10 @@ let eventIdCounter = 0;
 
 let globalSiteStart = '08:00';
 let globalSiteEnd   = '17:00';
+
+// Track which month admin has selected — view mode mirrors this
+let adminSelectedYear  = new Date().getFullYear();
+let adminSelectedMonth = new Date().getMonth();
 
 // ---- Enhancement state ----
 const STORAGE_KEY = 'dutyRoster_data_v1';
@@ -927,10 +775,7 @@ function saveToStorage() {
             endDate: END_DATE.toISOString(),
             roster, cellTime, events, eventIdCounter,
             globalSiteStart, globalSiteEnd,
-            members: MEMBERS, nextMemberId,
-            customDepartments,
-            publishedRoster,
-            _savedAt: new Date().toISOString()
+            adminSelectedYear, adminSelectedMonth
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         if (indicator) setTimeout(() => indicator.classList.remove('saving'), 250);
@@ -957,19 +802,18 @@ function applyLoadedState(data) {
     eventIdCounter   = data.eventIdCounter || 0;
     globalSiteStart  = data.globalSiteStart || '08:00';
     globalSiteEnd    = data.globalSiteEnd || '17:00';
-    if (Array.isArray(data.members) && data.members.length) {
-        MEMBERS = data.members;
-        nextMemberId = data.nextMemberId || (Math.max(...MEMBERS.map(m => m.id)) + 1);
-    }
-    if (Array.isArray(data.customDepartments)) {
-        customDepartments = data.customDepartments;
-    }
-    if (data.publishedRoster && typeof data.publishedRoster === 'object') {
-        publishedRoster = data.publishedRoster;
+    // Restore admin-selected month so view mode shows the same month
+    if (typeof data.adminSelectedYear !== 'undefined') {
+        adminSelectedYear  = data.adminSelectedYear;
+        adminSelectedMonth = data.adminSelectedMonth;
+        // Non-admin viewers should see whatever month admin has set
+        if (!isAdmin) {
+            START_DATE = new Date(adminSelectedYear, adminSelectedMonth, 1);
+            END_DATE   = new Date(adminSelectedYear, adminSelectedMonth + 1, 0);
+        }
     }
     document.getElementById('siteStart').value = globalSiteStart;
     document.getElementById('siteEnd').value   = globalSiteEnd;
-    initRoster();
 }
 
 // ============================================================
@@ -1060,9 +904,7 @@ async function githubPush(silent) {
             endDate: END_DATE.toISOString(),
             roster, cellTime, events, eventIdCounter,
             globalSiteStart, globalSiteEnd,
-            members: MEMBERS, nextMemberId,
-            customDepartments,
-            publishedRoster,
+            adminSelectedYear, adminSelectedMonth,
             _syncedAt: new Date().toISOString()
         };
         const body = {
@@ -1106,6 +948,11 @@ async function githubPull() {
         }
         const data = JSON.parse(base64ToUtf8(existing.content));
         applyLoadedState(data);
+        // If not admin, show admin-selected month
+        if (!isAdmin && typeof data.adminSelectedYear !== 'undefined') {
+            START_DATE = new Date(data.adminSelectedYear, data.adminSelectedMonth, 1);
+            END_DATE   = new Date(data.adminSelectedYear, data.adminSelectedMonth + 1, 0);
+        }
         render();
         updateGithubStatusUI();
         showToast('Pulled latest roster from GitHub', 'success');
@@ -1175,37 +1022,28 @@ function getWeekNumber(date) {
 
 // ---- Init & Ensure State ----
 function initRoster() {
-    MEMBERS.forEach(m => {
-        if (!roster[m.id])   roster[m.id]   = {};
-        if (!cellTime[m.id]) cellTime[m.id] = {};
+    MEMBERS.forEach((_,idx) => {
+        roster[idx]   = {};
+        cellTime[idx] = {};
     });
     ensureStateForCurrentDates();
-    renderAttendeesChecklist();
-}
 
-function renderAttendeesChecklist() {
+    // Populate Attendees Checklist in Modal
     const attendeesListContainer = document.getElementById('modalAttendeesList');
-    if (!attendeesListContainer) return;
-    attendeesListContainer.innerHTML = MEMBERS.map(m => `
+    attendeesListContainer.innerHTML = MEMBERS.map((m, i) => `
         <label class="attendee-item">
-            <input type="checkbox" class="attendee-cb" value="${m.id}" /> ${escHtml(m.name)} <span style="color:var(--text-faint);font-weight:400;">— ${escHtml(m.department || 'Unassigned')}</span>
+            <input type="checkbox" class="attendee-cb" value="${i}" /> ${m}
         </label>
     `).join('');
 }
 
-function ensureMemberState(id) {
-    if (!roster[id])   roster[id]   = {};
-    if (!cellTime[id]) cellTime[id] = {};
-}
-
 function ensureStateForCurrentDates() {
     const days = getDaysArray();
-    MEMBERS.forEach(m => {
-        ensureMemberState(m.id);
+    MEMBERS.forEach((_,idx) => {
         days.forEach(d => {
             const k = formatDateKey(d);
-            if (typeof roster[m.id][k] === 'undefined') roster[m.id][k] = '';
-            if (typeof cellTime[m.id][k] === 'undefined') cellTime[m.id][k] = null;
+            if (typeof roster[idx][k] === 'undefined') roster[idx][k] = '';
+            if (typeof cellTime[idx][k] === 'undefined') cellTime[idx][k] = null;
         });
     });
 }
@@ -1221,13 +1059,13 @@ function updateHeaderDates() {
 function getOffCounts() {
     const days = getDaysArray();
     const result = {};
-    MEMBERS.forEach(m => { result[m.id] = {}; });
+    MEMBERS.forEach((_,idx) => { result[idx] = {}; });
     days.forEach(d => {
         const wk  = getWeekNumber(d);
         const key = formatDateKey(d);
-        MEMBERS.forEach(m => {
-            if (!result[m.id][wk]) result[m.id][wk] = 0;
-            if (roster[m.id][key] && roster[m.id][key] !== '') result[m.id][wk]++;
+        MEMBERS.forEach((_,idx) => {
+            if (!result[idx][wk]) result[idx][wk] = 0;
+            if (roster[idx][key] && roster[idx][key] !== '') result[idx][wk]++;
         });
     });
     return result;
@@ -1277,29 +1115,26 @@ function render() {
     let bodyHtml = '';
     const searchTerm = memberSearchTerm.trim().toLowerCase();
 
-    // Map "memberId_dateKey" -> array of event titles, for showing event-dots on the grid
+    // Map "memberIdx_dateKey" -> array of event titles, for showing event-dots on the grid
     const eventsByCell = {};
     events.forEach(ev => {
-        (ev.attendees || []).forEach(memberId => {
-            const k = `${memberId}_${ev.date}`;
+        (ev.attendees || []).forEach(memberIdx => {
+            const k = `${memberIdx}_${ev.date}`;
             if (!eventsByCell[k]) eventsByCell[k] = [];
             eventsByCell[k].push(ev.title);
         });
     });
 
-    MEMBERS.forEach(m => {
-        const id = m.id, name = m.name;
-        const rowOff = offCounts[id] || {};
+    MEMBERS.forEach((name, idx) => {
+        const rowOff = offCounts[idx] || {};
         let totalOff = Object.values(rowOff).reduce((a,b)=>a+b,0);
         const warn = (totalOff < 4 || totalOff > 5) ? 'off-warning' : 'off-ok';
-        const matchesSearch = !searchTerm || name.toLowerCase().includes(searchTerm);
-        const matchesDept   = departmentFilter === 'all' || (m.department || 'Unassigned') === departmentFilter;
-        const matches = matchesSearch && matchesDept;
+        const matches = !searchTerm || name.toLowerCase().includes(searchTerm);
         bodyHtml += `<tr class="${matches ? '' : 'row-hidden'}">`;
-        bodyHtml += `<td><strong>${escHtml(name)}</strong> <span class="member-dept">· ${escHtml(m.department || 'Unassigned')}</span> <span class="off-counter ${warn}">${totalOff} off</span></td>`;
+        bodyHtml += `<td>${name} <span class="off-counter ${warn}">${totalOff} off</span></td>`;
 
         dateKeys.forEach((dk, i) => {
-            const status    = roster[id][dk] || '';
+            const status    = roster[idx][dk] || '';
             const isWeekEnd = days[i].getDay()===6;
             const isToday   = dk === todayKey;
             let cls         = isWeekEnd ? 'week-end' : '';
@@ -1308,20 +1143,20 @@ function render() {
             const colorClass= status || 'working';
             const isOff     = status === 'off';
 
-            const timeStr = getCellTimeDisplay(id, dk);
-            const isCustomTime = hasCellTime(id, dk);
+            const timeStr = getCellTimeDisplay(idx, dk);
+            const isCustomTime = hasCellTime(idx, dk);
             const timeCls = isOff ? 'off-time' : (isCustomTime ? 'custom' : '');
-            const cellEvents = eventsByCell[`${id}_${dk}`];
+            const cellEvents = eventsByCell[`${idx}_${dk}`];
             const eventDot = cellEvents ? `<span class="event-dot" title="📌 ${escHtml(cellEvents.join(', '))}"></span>` : '';
 
-            bodyHtml += `<td class="${cls}" data-member="${id}" data-date="${dk}">
+            bodyHtml += `<td class="${cls}" data-member="${idx}" data-date="${dk}">
                 <div class="cell-wrapper">
                     ${eventDot}
                     <div>
                         <span class="cell-status ${colorClass}">${display}</span>
                         <span class="cell-time ${timeCls}">${isOff ? '—' : timeStr}</span>
                     </div>
-                    <div class="status-popup" data-member="${id}" data-date="${dk}">
+                    <div class="status-popup" data-member="${idx}" data-date="${dk}">
                         <div class="popup-section-title">Status</div>
                         <div class="popup-status-grid">
                             <button class="popup-btn off" data-status="off"><span class="badge"></span>OFF</button>
@@ -1330,15 +1165,16 @@ function render() {
                             <button class="popup-btn sick" data-status="sick"><span class="badge"></span>SICK</button>
                             <button class="popup-btn abp" data-status="abp"><span class="badge"></span>ABP</button>
                             <button class="popup-btn al" data-status="al"><span class="badge"></span>AL</button>
+                            <button class="popup-btn abs" data-status="abs"><span class="badge"></span>ABS</button>
                             <button class="popup-btn clear" data-status=""><span class="badge"></span>Working</button>
                         </div>
                         <hr class="popup-divider"/>
                         <div class="popup-time-section">
                             <div class="time-label">⏱️ Override Time</div>
                             <div class="popup-time-row">
-                                <input type="time" class="time-start" value="${cellTime[id][dk]?.start || globalSiteStart}" />
+                                <input type="time" class="time-start" value="${cellTime[idx][dk]?.start || globalSiteStart}" />
                                 <span>to</span>
-                                <input type="time" class="time-end" value="${cellTime[id][dk]?.end || globalSiteEnd}" />
+                                <input type="time" class="time-end" value="${cellTime[idx][dk]?.end || globalSiteEnd}" />
                             </div>
                             <button class="popup-time-apply">Apply Time</button>
                             <button class="popup-time-clear">Reset</button>
@@ -1358,26 +1194,12 @@ function render() {
     // ---- Header Info ----
     document.getElementById('siteTimeDisplay').textContent = `⏰ ${globalSiteStart} – ${globalSiteEnd}`;
     const periodLabel = `${days[0].toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})} – ${days[days.length-1].toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}`;
-    
-    let subtitleText = periodLabel;
-    if (publishedRoster && !isAdmin) {
-        // View-only mode: show published roster status
-        const pubLabel = `${new Date(publishedRoster.startDate).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})} – ${new Date(publishedRoster.endDate).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}`;
-        const genDate = new Date(publishedRoster.generatedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
-        subtitleText = `📋 Published Roster · ${pubLabel} (Generated ${genDate})`;
-    } else if (isAdmin && publishedRoster) {
-        subtitleText = `📝 Working Roster · ${periodLabel} (Published exists)`;
-    } else if (isAdmin) {
-        subtitleText = `📝 Working Roster · ${periodLabel}`;
-    }
-    
-    document.getElementById('periodSubtitle').textContent = subtitleText;
+    document.getElementById('periodSubtitle').textContent = periodLabel;
     document.title = `Duty Roster - ${periodLabel}`;
     document.getElementById('printPeriod').textContent = periodLabel;
     document.getElementById('printGenerated').textContent = new Date().toLocaleString('en-GB');
 
     renderDashboard(days, dateKeys, todayKey);
-    populateDepartmentFilter();
     attachCellListeners();
     saveToStorage();
 }
@@ -1387,13 +1209,12 @@ function renderDashboard(days, dateKeys, todayKey) {
     const dash = document.getElementById('dashboard');
     if (!dash) return;
     const total = MEMBERS.length;
-    const deptCount = getUsedDepartments().length;
     const todayInRange = dateKeys.includes(todayKey);
 
     let working=0, off=0, sick=0, onLeave=0; // onLeave = ph+po+abp
     if (todayInRange) {
-        MEMBERS.forEach(m => {
-            const status = roster[m.id][todayKey] || '';
+        MEMBERS.forEach((_, idx) => {
+            const status = roster[idx][todayKey] || '';
             if (status === '') working++;
             else if (status === 'off') off++;
             else if (status === 'sick') sick++;
@@ -1402,9 +1223,9 @@ function renderDashboard(days, dateKeys, todayKey) {
     }
 
     let totalOffPeriod = 0, totalSickPeriod = 0;
-    MEMBERS.forEach(m => {
+    MEMBERS.forEach((_, idx) => {
         dateKeys.forEach(dk => {
-            const s = roster[m.id][dk];
+            const s = roster[idx][dk];
             if (s === 'off') totalOffPeriod++;
             if (s === 'sick') totalSickPeriod++;
         });
@@ -1412,16 +1233,16 @@ function renderDashboard(days, dateKeys, todayKey) {
 
     dash.innerHTML = `
         <div class="stat-card"><div class="stat-label">👥 Total Staff</div><div class="stat-value">${total}</div></div>
-        <div class="stat-card"><div class="stat-label">🏨 Departments</div><div class="stat-value">${deptCount}</div></div>
         <div class="stat-card accent-working"><div class="stat-label">✅ Working Today</div><div class="stat-value">${todayInRange ? working : '—'}</div></div>
         <div class="stat-card accent-off"><div class="stat-label">🛌 Off Today</div><div class="stat-value">${todayInRange ? off : '—'}</div></div>
         <div class="stat-card accent-sick"><div class="stat-label">🤒 Sick Today</div><div class="stat-value">${todayInRange ? sick : '—'}</div></div>
         <div class="stat-card accent-ph"><div class="stat-label">📋 On Leave Today</div><div class="stat-value">${todayInRange ? onLeave : '—'}</div></div>
+        <div class="stat-card"><div class="stat-label">📌 Events This Period</div><div class="stat-value">${events.filter(e => dateKeys.includes(e.date)).length}</div></div>
     `;
 
     const printSummary = document.getElementById('printSummary');
     if (printSummary) {
-        printSummary.innerHTML = `<span>Total Staff: ${total}</span><span>Departments: ${deptCount}</span><span>Total OFF-days: ${totalOffPeriod}</span><span>Total SICK-days: ${totalSickPeriod}</span><span>Events: ${events.filter(e => dateKeys.includes(e.date)).length}</span>`;
+        printSummary.innerHTML = `<span>Total Staff: ${total}</span><span>Total OFF-days: ${totalOffPeriod}</span><span>Total SICK-days: ${totalSickPeriod}</span><span>Events: ${events.filter(e => dateKeys.includes(e.date)).length}</span>`;
     }
 }
 
@@ -1448,7 +1269,7 @@ function renderEvents() {
         
         let attendeesHtml = '';
         if (ev.attendees && ev.attendees.length > 0) {
-            const names = ev.attendees.map(id => getMemberName(id)).join(', ');
+            const names = ev.attendees.map(idx => MEMBERS[idx]).join(', ');
             attendeesHtml = `<div class="event-attendees">👥 Assigned: ${names}</div>`;
         }
 
@@ -1623,6 +1444,9 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
     isAdmin = false;
     document.body.classList.remove('is-admin');
     document.querySelectorAll('.status-popup.active').forEach(p => p.classList.remove('active')); // close popups
+    // Snap view mode back to admin-selected month
+    START_DATE = new Date(adminSelectedYear, adminSelectedMonth, 1);
+    END_DATE   = new Date(adminSelectedYear, adminSelectedMonth + 1, 0);
     render();
     showToast('Logged out of admin mode', '');
 });
@@ -1743,157 +1567,6 @@ document.getElementById('searchClear').addEventListener('click', () => {
     render();
 });
 
-// ---- Department filter ----
-function populateDepartmentFilter() {
-    const sel = document.getElementById('departmentFilterSelect');
-    if (!sel) return;
-    const current = departmentFilter;
-    const depts = getFilterableDepartments();
-    const optionsHtml = `<option value="all">All Departments</option>` +
-        depts.map(d => `<option value="${escAttr(d)}">${escHtml(d)}</option>`).join('');
-    if (sel.innerHTML !== optionsHtml) sel.innerHTML = optionsHtml; // avoid disrupting open dropdown unnecessarily
-    sel.value = depts.includes(current) ? current : 'all';
-    departmentFilter = sel.value;
-}
-document.getElementById('departmentFilterSelect').addEventListener('change', function() {
-    departmentFilter = this.value;
-    render();
-});
-
-// ---- Manage Staff modal ----
-const staffModal = document.getElementById('staffModal');
-
-function populateDepartmentSuggestions() {
-    document.getElementById('departmentSuggestions').innerHTML =
-        getDepartmentSuggestions().map(d => `<option value="${escAttr(d)}">`).join('');
-}
-
-function renderDeptChipList() {
-    const container = document.getElementById('deptChipList');
-    if (!container) return;
-    const used = new Set(MEMBERS.map(m => m.department || 'Unassigned'));
-    const all = Array.from(new Set([...DEFAULT_DEPARTMENTS, ...customDepartments, ...used])).sort();
-    container.innerHTML = all.map(d => {
-        const removable = customDepartments.includes(d) && !used.has(d);
-        return `<span class="dept-chip">${escHtml(d)}${removable ? `<button class="dept-chip-remove" data-dept="${escAttr(d)}" title="Remove department">✕</button>` : ''}</span>`;
-    }).join('');
-}
-
-document.getElementById('addDeptBtn').addEventListener('click', () => {
-    const input = document.getElementById('newDeptName');
-    const name = input.value.trim();
-    if (!name) { showToast('Enter a department name first', 'error'); return; }
-    const exists = getDepartmentSuggestions().some(d => d.toLowerCase() === name.toLowerCase());
-    if (exists) { showToast('That department already exists', 'error'); return; }
-    customDepartments.push(name);
-    input.value = '';
-    renderDeptChipList();
-    populateDepartmentSuggestions();
-    populateDepartmentFilter();
-    saveToStorage();
-    showToast(`"${name}" department added`, 'success');
-});
-document.getElementById('newDeptName').addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('addDeptBtn').click(); }
-});
-document.getElementById('deptChipList').addEventListener('click', e => {
-    if (!e.target.classList.contains('dept-chip-remove')) return;
-    const dept = e.target.dataset.dept;
-    if (!confirm(`Remove "${dept}" from the department list?`)) return;
-    customDepartments = customDepartments.filter(d => d !== dept);
-    renderDeptChipList();
-    populateDepartmentSuggestions();
-    populateDepartmentFilter();
-    saveToStorage();
-    showToast(`"${dept}" removed`, '');
-});
-
-function renderStaffList() {
-    const container = document.getElementById('staffList');
-    if (!MEMBERS.length) {
-        container.innerHTML = `<div class="staff-empty">No staff added yet.</div>`;
-        return;
-    }
-    const sorted = [...MEMBERS].sort((a,b) => (a.department||'').localeCompare(b.department||'') || a.name.localeCompare(b.name));
-    container.innerHTML = sorted.map(m => `
-        <div class="staff-row" data-id="${m.id}">
-            <div class="staff-row-info">
-                <input type="text" class="staff-name-input" value="${escAttr(m.name)}" />
-                <input type="text" class="staff-dept-input" value="${escAttr(m.department || '')}" list="departmentSuggestions" />
-            </div>
-            <div class="staff-row-actions">
-                <button class="icon-btn staff-save-btn" title="Save changes">💾</button>
-                <button class="icon-btn staff-del-btn" title="Remove member">🗑️</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-document.getElementById('openStaffBtn').addEventListener('click', () => {
-    populateDepartmentSuggestions();
-    renderDeptChipList();
-    renderStaffList();
-    staffModal.classList.add('active');
-});
-document.getElementById('closeStaffModal').addEventListener('click', () => staffModal.classList.remove('active'));
-staffModal.addEventListener('click', e => { if (e.target===staffModal) staffModal.classList.remove('active'); });
-
-document.getElementById('staffList').addEventListener('click', function(e) {
-    const row = e.target.closest('.staff-row');
-    if (!row) return;
-    const id = Number(row.dataset.id);
-    const m = getMemberById(id);
-    if (!m) return;
-
-    if (e.target.classList.contains('staff-save-btn')) {
-        const name = row.querySelector('.staff-name-input').value.trim();
-        const dept = row.querySelector('.staff-dept-input').value.trim();
-        if (!name) { showToast('Name cannot be empty', 'error'); return; }
-        m.name = name;
-        m.department = dept || 'Unassigned';
-        render();
-        renderStaffList();
-        renderDeptChipList();
-        populateDepartmentSuggestions();
-        showToast(`${name} updated`, 'success');
-    }
-
-    if (e.target.classList.contains('staff-del-btn')) {
-        if (!confirm(`Remove ${m.name}? Their schedule history for every month will be deleted. This can't be undone.`)) return;
-        MEMBERS = MEMBERS.filter(x => x.id !== id);
-        delete roster[id];
-        delete cellTime[id];
-        events.forEach(ev => { ev.attendees = (ev.attendees || []).filter(a => a !== id); });
-        render();
-        renderStaffList();
-        renderAttendeesChecklist();
-        renderDeptChipList();
-        populateDepartmentSuggestions();
-        showToast(`${m.name} removed`, '');
-    }
-});
-
-document.getElementById('addMemberBtn').addEventListener('click', () => {
-    const name = document.getElementById('newMemberName').value.trim();
-    const dept = document.getElementById('newMemberDept').value.trim() || 'Unassigned';
-    if (!name) { showToast('Enter a name first', 'error'); return; }
-
-    const id = nextMemberId++;
-    MEMBERS.push({ id, name, department: dept });
-    ensureMemberState(id);
-    ensureStateForCurrentDates();
-
-    document.getElementById('newMemberName').value = '';
-    document.getElementById('newMemberDept').value = '';
-
-    render();
-    renderStaffList();
-    renderAttendeesChecklist();
-    renderDeptChipList();
-    populateDepartmentSuggestions();
-    showToast(`${name} added to ${dept}`, 'success');
-});
-
 
 // ============================================================
 //  SAVE / LOAD DATA LOGIC
@@ -1909,11 +1582,7 @@ document.getElementById('saveDataBtn').addEventListener('click', function() {
         events: events,
         eventIdCounter: eventIdCounter,
         globalSiteStart: globalSiteStart,
-        globalSiteEnd: globalSiteEnd,
-        members: MEMBERS,
-        nextMemberId: nextMemberId,
-        customDepartments: customDepartments,
-        publishedRoster: publishedRoster
+        globalSiteEnd: globalSiteEnd
     };
 
     const dataStr = JSON.stringify(stateData, null, 2);
@@ -1964,6 +1633,8 @@ let pickerViewYear = START_DATE.getFullYear();
 function setMonth(year, monthIndex) {
     START_DATE = new Date(year, monthIndex, 1);
     END_DATE   = new Date(year, monthIndex + 1, 0); // last day of that month
+    adminSelectedYear  = year;
+    adminSelectedMonth = monthIndex;
     render();
     showToast(`Switched to ${MONTH_NAMES[monthIndex]} ${year}`, '');
 }
@@ -1987,20 +1658,17 @@ function renderMonthPickerGrid() {
 }
 
 document.getElementById('monthPickerBtn').addEventListener('click', (e) => {
-    if (!isAdmin) { showToast('Month navigation disabled in view-only mode', 'error'); return; }
     e.stopPropagation();
     pickerViewYear = START_DATE.getFullYear();
     renderMonthPickerGrid();
     document.getElementById('monthPickerPopup').classList.toggle('active');
 });
 document.getElementById('pickerPrevYear').addEventListener('click', (e) => {
-    if (!isAdmin) return;
     e.stopPropagation();
     pickerViewYear--;
     renderMonthPickerGrid();
 });
 document.getElementById('pickerNextYear').addEventListener('click', (e) => {
-    if (!isAdmin) return;
     e.stopPropagation();
     pickerViewYear++;
     renderMonthPickerGrid();
@@ -2013,22 +1681,18 @@ document.addEventListener('click', (e) => {
 });
 
 document.getElementById('prevMonthBtn').addEventListener('click', () => {
-    if (!isAdmin) { showToast('Month navigation disabled in view-only mode', 'error'); return; }
     const d = new Date(START_DATE.getFullYear(), START_DATE.getMonth() - 1, 1);
     setMonth(d.getFullYear(), d.getMonth());
 });
 document.getElementById('nextMonthBtn').addEventListener('click', () => {
-    if (!isAdmin) { showToast('Month navigation disabled in view-only mode', 'error'); return; }
     const d = new Date(START_DATE.getFullYear(), START_DATE.getMonth() + 1, 1);
     setMonth(d.getFullYear(), d.getMonth());
 });
 document.getElementById('goCurrentMonthBtn').addEventListener('click', () => {
-    if (!isAdmin) { showToast('Month navigation disabled in view-only mode', 'error'); return; }
     const today = new Date();
     setMonth(today.getFullYear(), today.getMonth());
 });
 document.getElementById('toggleCustomRangeBtn').addEventListener('click', () => {
-    if (!isAdmin) { showToast('Date range locked in view-only mode', 'error'); return; }
     const row = document.getElementById('customRangeRow');
     row.style.display = row.style.display === 'none' ? 'inline-flex' : 'none';
 });
@@ -2060,33 +1724,14 @@ document.getElementById('applySiteTime').addEventListener('click', function() {
     if (s && e) { globalSiteStart = s; globalSiteEnd = e; render(); }
 });
 
-document.getElementById('generateRosterBtn').addEventListener('click', function() {
-    if (!confirm(`Publish the roster from ${formatDateKey(START_DATE)} to ${formatDateKey(END_DATE)} for view-only users?\n\nYou can still edit your working copy, but viewers will see this locked version until you generate a new one.`)) return;
-    
-    publishedRoster = {
-        startDate: START_DATE.toISOString(),
-        endDate: END_DATE.toISOString(),
-        roster: JSON.parse(JSON.stringify(roster)), // deep copy
-        cellTime: JSON.parse(JSON.stringify(cellTime)),
-        events: JSON.parse(JSON.stringify(events)),
-        members: JSON.parse(JSON.stringify(MEMBERS)),
-        customDepartments: [...customDepartments],
-        generatedAt: new Date().toISOString()
-    };
-    saveToStorage();
-    scheduleGithubAutoPush();
-    render();
-    showToast('Roster generated and published to viewers', 'success');
-});
-
 document.getElementById('resetRoster').addEventListener('click', function() {
     if (confirm('Reset all statuses and times for all members?')) {
         const days = getDaysArray();
-        MEMBERS.forEach(m => {
+        MEMBERS.forEach((_,idx) => {
             days.forEach(d => {
                 const k = formatDateKey(d);
-                roster[m.id][k]   = '';
-                cellTime[m.id][k] = null;
+                roster[idx][k]   = '';
+                cellTime[idx][k] = null;
             });
         });
         render();
@@ -2097,17 +1742,17 @@ document.getElementById('resetRoster').addEventListener('click', function() {
 // CSV Export logic
 document.getElementById('exportCSV').addEventListener('click', function() {
     const days = getDaysArray();
-    let csv = 'Member,Department,';
+    let csv = 'Member,';
     
     csv += days.map(d => `${d.getDate()} ${DAY_NAMES[d.getDay()]}`).join(',') + '\n';
 
-    MEMBERS.forEach(m => {
-        let row = `"${m.name}","${m.department || 'Unassigned'}",`;
+    MEMBERS.forEach((name, idx) => {
+        let row = `"${name}",`;
         let statuses = days.map(d => {
             const k = formatDateKey(d);
-            const status = roster[m.id][k];
+            const status = roster[idx][k];
             const display = status ? (STATUS_LABELS[status] || status) : 'Working';
-            const time = getCellTimeDisplay(m.id, k);
+            const time = getCellTimeDisplay(idx, k);
             return status === 'off' ? 'OFF' : `"${display} (${time})"`;
         });
         row += statuses.join(',') + '\n';
@@ -2181,7 +1826,7 @@ document.getElementById('siteEnd').value   = globalSiteEnd;
 function demoFill() {
     const days     = getDaysArray();
     const dateKeys = days.map(d => formatDateKey(d));
-    MEMBERS.forEach(m => {
+    MEMBERS.forEach((_,idx) => {
         const weekAssign = {};
         days.forEach((d,i) => {
             const wk = getWeekNumber(d);
@@ -2193,7 +1838,7 @@ function demoFill() {
             if (!indices.length) return;
             const pick   = indices[Math.floor(Math.random()*indices.length)];
             const status = STATUSES[Math.floor(Math.random()*STATUSES.length)];
-            roster[m.id][dateKeys[pick]] = status;
+            roster[idx][dateKeys[pick]] = status;
         });
     });
     // Demo events
@@ -2203,52 +1848,43 @@ function demoFill() {
     events.push({ id:++eventIdCounter, date:formatDateKey(d2), title:'Safety Training', desc:'New safety protocols', startTime:'09:00', endTime:'12:00', category:'training', attendees:[0, 2, 4] });
 }
 
-// Load order:
-// 1) Show local browser storage immediately if present (fast first paint, works offline).
-// 2) If GitHub sync is configured, check GitHub in the background and switch if newer.
-// 3) In view-only mode, if a publishedRoster exists, display that locked version instead.
+// Load order: local browser storage first (fastest, always available offline).
+// If this device has no local copy yet but GitHub sync is configured, pull from GitHub
+// so a second device/browser picks up where the first one left off.
 (async function loadInitialData() {
     const savedRoster = loadFromStorageRaw();
     if (savedRoster) {
         applyLoadedState(savedRoster);
-    }
-
-    if (githubConfigured()) {
+        // If not admin, always display the admin-selected month
+        if (!isAdmin && typeof savedRoster.adminSelectedYear !== 'undefined') {
+            START_DATE = new Date(savedRoster.adminSelectedYear, savedRoster.adminSelectedMonth, 1);
+            END_DATE   = new Date(savedRoster.adminSelectedYear, savedRoster.adminSelectedMonth + 1, 0);
+        }
+        render();
+    } else if (githubConfigured()) {
         try {
-            setGithubStatus('syncing', 'GitHub: checking for updates…');
+            setGithubStatus('syncing', 'GitHub: loading…');
             const existing = await githubFetchFile();
             if (existing) {
-                const remoteData = JSON.parse(base64ToUtf8(existing.content));
-                const remoteTime = remoteData._syncedAt ? new Date(remoteData._syncedAt).getTime() : 0;
-                const localTime  = savedRoster && savedRoster._savedAt ? new Date(savedRoster._savedAt).getTime() : -1;
-                if (!savedRoster || remoteTime > localTime) {
-                    applyLoadedState(remoteData);
+                const parsed = JSON.parse(base64ToUtf8(existing.content));
+                applyLoadedState(parsed);
+                if (!isAdmin && typeof parsed.adminSelectedYear !== 'undefined') {
+                    START_DATE = new Date(parsed.adminSelectedYear, parsed.adminSelectedMonth, 1);
+                    END_DATE   = new Date(parsed.adminSelectedYear, parsed.adminSelectedMonth + 1, 0);
                 }
-            } else if (!savedRoster) {
+            } else {
                 demoFill();
             }
-            updateGithubStatusUI();
         } catch (err) {
             console.error('Initial GitHub pull failed:', err);
-            setGithubStatus('error', 'GitHub: load failed');
-            if (!savedRoster) { demoFill(); }
+            demoFill();
         }
-    } else if (!savedRoster) {
+        updateGithubStatusUI();
+        render();
+    } else {
         demoFill();
+        render();
     }
-
-    // In view-only mode, if a published roster exists, use that instead of the working one
-    if (!isAdmin && publishedRoster) {
-        START_DATE = new Date(publishedRoster.startDate);
-        END_DATE   = new Date(publishedRoster.endDate);
-        roster     = publishedRoster.roster;
-        cellTime   = publishedRoster.cellTime;
-        events     = publishedRoster.events;
-        MEMBERS    = publishedRoster.members;
-        customDepartments = publishedRoster.customDepartments || [];
-    }
-
-    render();
 })();
 
 // ESC to close
@@ -2258,7 +1894,6 @@ document.addEventListener('keydown', function(e) {
         loginModal.classList.remove('active');
         settingsModal.classList.remove('active');
         githubModal.classList.remove('active');
-        staffModal.classList.remove('active');
         document.querySelectorAll('.status-popup.active').forEach(p=>p.classList.remove('active'));
     }
 });

@@ -1,6 +1,6 @@
 {
-  "startDate": "2026-06-25T21:00:00.000Z",
-  "endDate": "2026-07-24T21:00:00.000Z",
+  "startDate": "2026-05-31T21:00:00.000Z",
+  "endDate": "2026-06-29T21:00:00.000Z",
   "roster": {
     "0": {
       "2026-06-01": "",
@@ -1995,5 +1995,5 @@
   "globalSiteEnd": "17:00",
   "adminSelectedYear": 2026,
   "adminSelectedMonth": 5,
-  "_syncedAt": "2026-06-27T14:37:25.086Z"
+  "_syncedAt": "2026-06-27T14:39:07.970Z"
 }

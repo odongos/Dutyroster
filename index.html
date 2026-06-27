@@ -349,6 +349,23 @@
             box-shadow: 0 0 0 0 rgba(16,185,129,0.4);
             animation: pulse-ring 1.8s ease-out infinite;
         }
+        .view-banner-status.draft {
+            background: rgba(245,158,11,0.15);
+            border-color: rgba(245,158,11,0.3);
+            color: #fbbf24;
+        }
+        .view-banner-status.draft .status-pulse {
+            background: #f59e0b;
+            animation: none;
+            box-shadow: none;
+        }
+        .banner-load-published-btn {
+            margin-top: 4px; padding: 5px 14px; font-size: 11.5px; font-weight: 700;
+            border-radius: 20px; border: 1px solid rgba(165,180,252,0.4);
+            background: rgba(99,102,241,0.18); color: #c7d2fe; cursor: pointer;
+            transition: 0.2s;
+        }
+        .banner-load-published-btn:hover { background: rgba(99,102,241,0.32); }
         @keyframes pulse-ring {
             0%   { box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
             70%  { box-shadow: 0 0 0 8px rgba(16,185,129,0); }
@@ -421,7 +438,7 @@
                 width: 100% !important;
             }
 
-            .controls, .legend, .status-popup, #resetRoster, #openEventModal, .dashboard, .toast-container, .save-indicator, .theme-toggle, #openSettingsBtn { 
+            .controls, .legend, .status-popup, #resetRoster, #openEventModal, .dashboard, .toast-container, .save-indicator, .theme-toggle, #openSettingsBtn, .view-only-banner, #weekFilterSelect { 
                 display: none !important; 
             }
 
@@ -466,15 +483,18 @@
                 color:#0f172a !important;
             }
 
-            /* Member column fixed at 250px */
+            /* Member column fixed at 200px */
             .roster-wrapper tbody td:first-child,
             .roster-wrapper thead th:first-child {
                 text-align: left !important;
                 padding-left: 6px !important;
-                width: 250px !important;
-                min-width: 250px !important;
-                max-width: 250px !important;
+                width: 200px !important;
+                min-width: 200px !important;
+                max-width: 200px !important;
             }
+
+            /* Hide columns excluded from a single-week PDF export */
+            .week-print-hide { display: none !important; }
 
             .roster-wrapper thead tr:first-child th, .roster-wrapper thead tr:last-child th{
                 background:#1e293b !important; color:#fff !important;
@@ -543,11 +563,12 @@
             </div>
         </div>
         <div class="view-banner-right">
-            <div class="view-banner-status">
+            <div class="view-banner-status" id="bannerStatus">
                 <span class="status-pulse"></span>
-                Roster Published
+                <span id="bannerStatusText">Roster Published</span>
             </div>
             <div class="view-banner-updated" id="bannerLastUpdated">—</div>
+            <button class="banner-load-published-btn" id="loadPublishedBtn" title="Fetch the latest roster published to GitHub">🔄 Load Published</button>
         </div>
     </div>
 
@@ -600,6 +621,9 @@
                 <input type="file" id="loadDataInput" accept=".json" style="display:none;" />
             </label>
 
+            <select id="weekFilterSelect" title="Choose Full Period or a single week to export" style="padding:7px 12px;border:1.5px solid var(--border-strong);border-radius:8px;font-size:13px;background:var(--card-bg);color:var(--text);cursor:pointer;">
+                <option value="all">📋 Full Period</option>
+            </select>
             <button class="btn btn-outline" id="exportCSV">📥 Export CSV</button>
             <button class="btn btn-outline" id="exportPDF">📄 Export PDF</button>
         </div>
@@ -848,6 +872,7 @@ let roster   = {};
 let cellTime = {};   
 let events   = [];
 let eventIdCounter = 0;
+let lastKnownUpdate = null; // ISO timestamp of the most recent save/publish, shown in the view banner
 
 let globalSiteStart = '08:00';
 let globalSiteEnd   = '17:00';
@@ -901,6 +926,7 @@ function saveToStorage() {
             adminSelectedYear, adminSelectedMonth,
             lastPublished: new Date().toISOString()
         };
+        lastKnownUpdate = data.lastPublished;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         if (indicator) setTimeout(() => indicator.classList.remove('saving'), 250);
         scheduleGithubAutoPush();
@@ -926,6 +952,7 @@ function applyLoadedState(data) {
     eventIdCounter   = data.eventIdCounter || 0;
     globalSiteStart  = data.globalSiteStart || '08:00';
     globalSiteEnd    = data.globalSiteEnd || '17:00';
+    lastKnownUpdate  = data.lastPublished || data._syncedAt || lastKnownUpdate;
     // Restore admin-selected month so view mode shows the same month
     if (typeof data.adminSelectedYear !== 'undefined') {
         adminSelectedYear  = data.adminSelectedYear;
@@ -1060,30 +1087,60 @@ async function githubPush(silent) {
     }
 }
 
+// Shared core: fetches the file from GitHub and applies it if present.
+// Returns true if a file was found & applied, false if no file exists yet (404).
+// Throws on network/API errors so callers can show a relevant message.
+async function pullRosterFromGithub() {
+    const existing = await githubFetchFile();
+    if (!existing) return false;
+    const data = JSON.parse(base64ToUtf8(existing.content));
+    applyLoadedState(data);
+    if (!isAdmin && typeof data.adminSelectedYear !== 'undefined') {
+        START_DATE = new Date(data.adminSelectedYear, data.adminSelectedMonth, 1);
+        END_DATE   = new Date(data.adminSelectedYear, data.adminSelectedMonth + 1, 0);
+    }
+    render();
+    return true;
+}
+
 async function githubPull() {
     if (!githubConfigured()) { showToast('Set up GitHub sync first (🐙 button)', 'error'); return; }
     setGithubStatus('syncing', 'GitHub: pulling…');
     try {
-        const existing = await githubFetchFile();
-        if (!existing) {
+        const found = await pullRosterFromGithub();
+        if (!found) {
             setGithubStatus('error', 'GitHub: no file yet');
             showToast('No file found in that repo/path yet — push first.', 'error');
             return;
         }
-        const data = JSON.parse(base64ToUtf8(existing.content));
-        applyLoadedState(data);
-        // If not admin, show admin-selected month
-        if (!isAdmin && typeof data.adminSelectedYear !== 'undefined') {
-            START_DATE = new Date(data.adminSelectedYear, data.adminSelectedMonth, 1);
-            END_DATE   = new Date(data.adminSelectedYear, data.adminSelectedMonth + 1, 0);
-        }
-        render();
         updateGithubStatusUI();
         showToast('Pulled latest roster from GitHub', 'success');
     } catch (err) {
         console.error('GitHub pull error:', err);
         setGithubStatus('error', 'GitHub: pull failed');
         showToast(`GitHub pull failed: ${err.message}`, 'error');
+    }
+}
+
+// Friendlier "Load Published" action used by the view-only banner button,
+// available to admins and viewers alike, on top of githubPull().
+async function loadPublishedRoster() {
+    if (!githubConfigured()) { showToast("GitHub sync isn't set up yet.", 'error'); return; }
+    if (isAdmin && !confirm('Load the published roster from GitHub? This will overwrite any unsaved local changes.')) return;
+    setGithubStatus('syncing', 'GitHub: loading…');
+    try {
+        const found = await pullRosterFromGithub();
+        if (!found) {
+            setGithubStatus('error', 'GitHub: no file yet');
+            showToast('No published roster found yet.', 'error');
+            return;
+        }
+        updateGithubStatusUI();
+        showToast('Loaded the published roster', 'success');
+    } catch (err) {
+        console.error('Load published roster failed:', err);
+        setGithubStatus('error', 'GitHub: load failed');
+        showToast(`Couldn't load published roster: ${err.message}`, 'error');
     }
 }
 
@@ -1205,6 +1262,28 @@ function hasCellTime(memberIdx, dateKey) {
     return ct && ct.start && ct.end;
 }
 
+// ---- Week filter (for exporting a single week's portion of the roster) ----
+function populateWeekFilter(days) {
+    const sel = document.getElementById('weekFilterSelect');
+    if (!sel) return;
+    const weeks = {};
+    days.forEach(d => {
+        const wk = getWeekNumber(d);
+        if (!weeks[wk]) weeks[wk] = [];
+        weeks[wk].push(d);
+    });
+    const weekNums = Object.keys(weeks).map(Number).sort((a,b) => a - b);
+    const prevVal = sel.value;
+    let optionsHtml = `<option value="all">📋 Full Period (${days.length} days)</option>`;
+    weekNums.forEach(wk => {
+        const wd = weeks[wk];
+        const lbl = `Week ${wk} (${wd[0].toLocaleDateString('en-GB',{day:'2-digit',month:'short'})} – ${wd[wd.length-1].toLocaleDateString('en-GB',{day:'2-digit',month:'short'})})`;
+        optionsHtml += `<option value="${wk}">${lbl}</option>`;
+    });
+    sel.innerHTML = optionsHtml;
+    sel.value = Array.from(sel.options).some(o => o.value === prevVal) ? prevVal : 'all';
+}
+
 // ============================================================
 //  RENDER
 // ============================================================
@@ -1223,13 +1302,13 @@ function render() {
     days.forEach(d => {
         let cls = d.getDay()===6 ? 'week-end' : '';
         if (formatDateKey(d) === todayKey) cls += ' today-col';
-        headHtml += `<th class="${cls}">${d.getDate()}<span class="dow">${DAY_NAMES[d.getDay()]}</span></th>`;
+        headHtml += `<th class="${cls}" data-date="${formatDateKey(d)}">${d.getDate()}<span class="dow">${DAY_NAMES[d.getDay()]}</span></th>`;
     });
     headHtml += `</tr><tr>`;
     days.forEach(d => {
         let cls = d.getDay()===6 ? 'week-end' : '';
         if (formatDateKey(d) === todayKey) cls += ' today-col';
-        headHtml += `<th class="${cls}">${DAY_NAMES[d.getDay()]}</th>`;
+        headHtml += `<th class="${cls}" data-date="${formatDateKey(d)}">${DAY_NAMES[d.getDay()]}</th>`;
     });
     headHtml += `</tr>`;
     thead.innerHTML = headHtml;
@@ -1331,9 +1410,39 @@ function render() {
     document.getElementById('printPeriod').textContent = periodLabel;
     document.getElementById('printGenerated').textContent = new Date().toLocaleString('en-GB');
 
+    // ---- View-only banner (shows the currently configured roster to non-admin viewers) ----
+    const bannerPeriodEl = document.getElementById('bannerPeriod');
+    if (bannerPeriodEl) bannerPeriodEl.textContent = periodLabel;
+    const bannerSiteTimeEl = document.getElementById('bannerSiteTime');
+    if (bannerSiteTimeEl) bannerSiteTimeEl.textContent = `${globalSiteStart} – ${globalSiteEnd}`;
+    const bannerStaffCountEl = document.getElementById('bannerStaffCount');
+    if (bannerStaffCountEl) bannerStaffCountEl.textContent = MEMBERS.length;
+    const bannerDaysCountEl = document.getElementById('bannerDaysCount');
+    if (bannerDaysCountEl) bannerDaysCountEl.textContent = days.length;
+
+    populateWeekFilter(days);
+
     renderDashboard(days, dateKeys, todayKey);
     attachCellListeners();
     saveToStorage();
+    updateBannerStatus();
+}
+
+// ---- View-only banner: publish status + last-updated timestamp (run after saveToStorage) ----
+function updateBannerStatus() {
+    const bannerStatusWrap = document.getElementById('bannerStatus');
+    const bannerStatusText = document.getElementById('bannerStatusText');
+    if (bannerStatusWrap && bannerStatusText) {
+        const published = githubConfigured() && !!lastKnownUpdate;
+        bannerStatusWrap.classList.toggle('draft', !published);
+        bannerStatusText.textContent = published ? 'Roster Published' : 'Local Draft';
+    }
+    const bannerLastUpdatedEl = document.getElementById('bannerLastUpdated');
+    if (bannerLastUpdatedEl) {
+        bannerLastUpdatedEl.textContent = lastKnownUpdate
+            ? 'Updated ' + new Date(lastKnownUpdate).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })
+            : '—';
+    }
 }
 
 // ---- Dashboard stats ----
@@ -1718,6 +1827,9 @@ document.getElementById('ghDisconnect').addEventListener('click', () => {
     showToast('GitHub sync disconnected', '');
 });
 
+// ---- View-only banner: "Load Published" button ----
+document.getElementById('loadPublishedBtn').addEventListener('click', () => loadPublishedRoster());
+
 // ---- Theme toggle ----
 document.getElementById('themeToggleBtn').addEventListener('click', () => {
     isDarkMode = !isDarkMode;
@@ -1914,7 +2026,15 @@ document.getElementById('resetRoster').addEventListener('click', function() {
 
 // CSV Export logic
 document.getElementById('exportCSV').addEventListener('click', function() {
-    const days = getDaysArray();
+    const weekSel = document.getElementById('weekFilterSelect');
+    const weekVal = weekSel ? weekSel.value : 'all';
+    let days = getDaysArray();
+    let weekSuffix = '';
+    if (weekVal && weekVal !== 'all') {
+        const weekDays = days.filter(d => String(getWeekNumber(d)) === weekVal);
+        if (weekDays.length) { days = weekDays; weekSuffix = `_Week${weekVal}`; }
+    }
+
     let csv = 'Member,';
     
     csv += days.map(d => `${d.getDate()} ${DAY_NAMES[d.getDay()]}`).join(',') + '\n';
@@ -1936,13 +2056,49 @@ document.getElementById('exportCSV').addEventListener('click', function() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Duty_Roster_${getPeriodFileLabel()}.csv`;
+    a.download = `Duty_Roster_${getPeriodFileLabel()}${weekSuffix}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
 });
 
-// PDF Export Logic
+// PDF Export Logic — exports the Full Period or just the single week chosen
+// in the week filter dropdown, by hiding the out-of-range date columns
+// before invoking the browser's print/Save-as-PDF dialog.
 document.getElementById('exportPDF').addEventListener('click', function() {
+    const weekSel = document.getElementById('weekFilterSelect');
+    const weekVal = weekSel ? weekSel.value : 'all';
+
+    if (!weekVal || weekVal === 'all') {
+        window.print();
+        return;
+    }
+
+    const days = getDaysArray();
+    const weekDays = days.filter(d => String(getWeekNumber(d)) === weekVal);
+    if (!weekDays.length) { window.print(); return; }
+    const weekKeys = new Set(weekDays.map(d => formatDateKey(d)));
+
+    const dateCells = document.querySelectorAll('#rosterTable [data-date]');
+    dateCells.forEach(el => {
+        el.classList.toggle('week-print-hide', !weekKeys.has(el.getAttribute('data-date')));
+    });
+
+    const printPeriodEl = document.getElementById('printPeriod');
+    const originalPeriodText = printPeriodEl.textContent;
+    printPeriodEl.textContent =
+        `${weekDays[0].toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})} – ${weekDays[weekDays.length-1].toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})} (Week ${weekVal})`;
+
+    let restored = false;
+    function restore() {
+        if (restored) return;
+        restored = true;
+        dateCells.forEach(el => el.classList.remove('week-print-hide'));
+        printPeriodEl.textContent = originalPeriodText;
+        window.removeEventListener('afterprint', restore);
+    }
+    window.addEventListener('afterprint', restore);
+    setTimeout(restore, 15000); // safety net in case afterprint doesn't fire
+
     window.print();
 });
 
@@ -2066,8 +2222,14 @@ function demoFill() {
 // Load order: local browser storage first (fastest, always available offline).
 // If this device has no local copy yet but GitHub sync is configured, pull from GitHub
 // so a second device/browser picks up where the first one left off.
+// Load order: local browser storage first (fastest, always available offline,
+// shown immediately so the page never looks blank). If GitHub sync is configured,
+// always follow up with a fresh pull so every device/browser auto-syncs to the
+// latest published roster, then re-render with whatever GitHub returns.
 (async function loadInitialData() {
     const savedRoster = loadFromStorageRaw();
+    let haveData = false;
+
     if (savedRoster) {
         applyLoadedState(savedRoster);
         // If not admin, always display the admin-selected month
@@ -2076,27 +2238,21 @@ function demoFill() {
             END_DATE   = new Date(savedRoster.adminSelectedYear, savedRoster.adminSelectedMonth + 1, 0);
         }
         render();
-    } else if (githubConfigured()) {
+        haveData = true;
+    }
+
+    if (githubConfigured()) {
         try {
             setGithubStatus('syncing', 'GitHub: loading…');
-            const existing = await githubFetchFile();
-            if (existing) {
-                const parsed = JSON.parse(base64ToUtf8(existing.content));
-                applyLoadedState(parsed);
-                if (!isAdmin && typeof parsed.adminSelectedYear !== 'undefined') {
-                    START_DATE = new Date(parsed.adminSelectedYear, parsed.adminSelectedMonth, 1);
-                    END_DATE   = new Date(parsed.adminSelectedYear, parsed.adminSelectedMonth + 1, 0);
-                }
-            } else {
-                demoFill();
-            }
+            const found = await pullRosterFromGithub();
+            if (!found && !haveData) { demoFill(); render(); }
+            updateGithubStatusUI();
         } catch (err) {
             console.error('Initial GitHub pull failed:', err);
-            demoFill();
+            updateGithubStatusUI();
+            if (!haveData) { demoFill(); render(); }
         }
-        updateGithubStatusUI();
-        render();
-    } else {
+    } else if (!haveData) {
         demoFill();
         render();
     }

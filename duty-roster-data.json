@@ -1835,5 +1835,59 @@
   "eventIdCounter": 3,
   "globalSiteStart": "08:00",
   "globalSiteEnd": "17:00",
-  "_syncedAt": "2026-06-26T14:25:56.231Z"
+  "members": [
+    {
+      "id": 0,
+      "name": "GALABUZI JOSEPH",
+      "department": "Audio Visual"
+    },
+    {
+      "id": 1,
+      "name": "MUBIRU ABDUL HAKIM",
+      "department": "Audio Visual"
+    },
+    {
+      "id": 2,
+      "name": "ATWINE SCOTT",
+      "department": "Audio Visual"
+    },
+    {
+      "id": 3,
+      "name": "KATENDE MOSES",
+      "department": "Audio Visual"
+    },
+    {
+      "id": 4,
+      "name": "NDAWULA DERRICK",
+      "department": "Audio Visual"
+    },
+    {
+      "id": 5,
+      "name": "BOGERE ALEX",
+      "department": "Audio Visual"
+    },
+    {
+      "id": 6,
+      "name": "BHIMJI MAVJI BHUDHIYA",
+      "department": "Audio Visual"
+    },
+    {
+      "id": 7,
+      "name": "ODONGO STEPHEN",
+      "department": "Audio Visual"
+    },
+    {
+      "id": 8,
+      "name": "NGIRABAKAUNZI ALEX",
+      "department": "Audio Visual"
+    },
+    {
+      "id": 9,
+      "name": "VINCENT KALIBBALA",
+      "department": "Audio Visual"
+    }
+  ],
+  "nextMemberId": 10,
+  "customDepartments": [],
+  "_syncedAt": "2026-06-27T09:41:08.748Z"
 }

@@ -1,6 +1,6 @@
 {
-  "startDate": "2026-05-31T21:00:00.000Z",
-  "endDate": "2026-06-29T21:00:00.000Z",
+  "startDate": "2026-06-25T21:00:00.000Z",
+  "endDate": "2026-07-24T21:00:00.000Z",
   "roster": {
     "0": {
       "2026-06-01": "",
@@ -1922,6 +1922,32 @@
   },
   "events": [
     {
+      "id": 1,
+      "date": "2026-06-06",
+      "title": "AV Systems Integration Conference",
+      "desc": "Rwenzori Conference Centre",
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "category": "conference",
+      "attendees": [
+        7
+      ]
+    },
+    {
+      "id": 2,
+      "date": "2026-06-19",
+      "title": "Safety Training",
+      "desc": "New safety protocols",
+      "startTime": "09:00",
+      "endTime": "12:00",
+      "category": "training",
+      "attendees": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
       "id": 3,
       "date": "2026-06-27",
       "title": "Dinner Reception",
@@ -1971,5 +1997,5 @@
   "adminSelectedMonth": 5,
   "adminSelectedStartDate": "2026-06-01",
   "adminSelectedEndDate": "2026-06-30",
-  "_syncedAt": "2026-06-27T15:03:17.417Z"
+  "_syncedAt": "2026-06-27T15:04:22.123Z"
 }

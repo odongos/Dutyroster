@@ -430,38 +430,40 @@
 
             /* Style member names and department in print */
             .roster-wrapper tbody td:first-child {
-                font-size: 11px !important;
-                padding: 8px 6px !important;
-                line-height: 1.6;
+                font-size: 9px !important;
+                padding: 4px 6px !important;
+                line-height: 1.2;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
-            /* Member name - bold */
+            /* Member name - bold, inline */
             .roster-wrapper tbody td:first-child strong {
-                display: block;
+                display: inline;
                 font-weight: 700;
                 color: #0f172a;
-                margin-bottom: 2px;
             }
 
-            /* Member department - lighter color, smaller */
+            /* Member department - lighter color, inline */
             .roster-wrapper tbody td:first-child .member-dept {
                 display: inline;
                 color: #64748b;
-                font-size: 9px;
+                font-size: 8px;
                 font-weight: 400;
+                margin-left: 2px;
+                margin-right: 4px;
             }
 
-            /* Off counter - teal badge style */
+            /* Off counter - inline badge style */
             .roster-wrapper tbody td:first-child .off-counter {
-                display: block;
+                display: inline-block;
                 background: #d1fae5 !important;
                 color: #0d7377 !important;
-                padding: 1px 6px !important;
-                border-radius: 10px;
-                font-size: 9px !important;
+                padding: 1px 4px !important;
+                border-radius: 8px;
+                font-size: 8px !important;
                 font-weight: 600;
-                margin-top: 3px;
-                width: fit-content;
             }
             }
 

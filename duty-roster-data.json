@@ -2010,14 +2010,27 @@
         8,
         9
       ]
+    },
+    {
+      "id": 8,
+      "startDate": "2026-06-26",
+      "endDate": "2026-06-26",
+      "title": "Wedding Reception",
+      "desc": "CWBH",
+      "startTime": "14:00",
+      "endTime": "00:59",
+      "category": "general",
+      "attendees": [
+        3
+      ]
     }
   ],
-  "eventIdCounter": 7,
+  "eventIdCounter": 8,
   "globalSiteStart": "08:00",
   "globalSiteEnd": "17:00",
   "adminSelectedYear": 2026,
   "adminSelectedMonth": 5,
   "adminSelectedStartDate": "2026-06-01",
   "adminSelectedEndDate": "2026-06-30",
-  "_syncedAt": "2026-06-27T16:09:17.626Z"
+  "_syncedAt": "2026-06-27T16:12:57.203Z"
 }

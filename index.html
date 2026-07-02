@@ -135,6 +135,9 @@
         /* ===== MONTH NAVIGATOR ===== */
         .month-nav{display:flex;align-items:center;gap:6px;position:relative;}
         .month-nav .icon-btn{width:32px;height:32px;font-size:14px;}
+        #monthPickerBtn{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:6px 16px;line-height:1.2;}
+        .month-btn-main{font-size:13px;font-weight:700;}
+        .month-btn-range{font-size:10px;font-weight:600;color:var(--text-muted);letter-spacing:0.2px;}
 
         .month-picker-popup{display:none;position:absolute;top:115%;left:0;background:var(--card-bg);border:1px solid var(--border-strong);border-radius:14px;box-shadow:0 16px 44px var(--shadow);padding:14px;z-index:300;width:230px;}
         .month-picker-popup.active{display:block;}
@@ -145,6 +148,7 @@
         .month-picker-grid button:hover{background:var(--row-hover);}
         .month-picker-grid button.active-month{background:#4338ca;color:#fff;border-color:#4338ca;}
         .month-picker-grid button.current-month-marker{box-shadow:inset 0 0 0 2px #059669;}
+        .month-picker-footnote{margin-top:10px;padding-top:8px;border-top:1px solid var(--border-strong);font-size:10.5px;font-weight:600;color:var(--text-muted);text-align:center;}
 
         /* ===== EVENT DOT on roster cells ===== */
         .event-dot{position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:#4338ca;box-shadow:0 0 0 2px var(--card-bg);}
@@ -205,6 +209,20 @@
         .modal .modal-actions .btn-secondary:hover{background:#cbd5e1;}
         .modal .modal-actions .btn-primary{background:#4338ca;color:#fff;}
         .modal .modal-actions .btn-primary:hover{background:#3730a3;}
+
+        /* Disabled / in-flight state for any button (controls or modal) used during async ops */
+        .btn:disabled, .btn[disabled] {
+            opacity: 0.6; cursor: not-allowed !important; transform: none !important; pointer-events: none;
+        }
+        .btn .btn-spinner {
+            display: inline-block; width: 11px; height: 11px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff;
+            animation: btn-spin 0.7s linear infinite; margin-right: 6px; vertical-align: -1px;
+        }
+        .btn-outline .btn-spinner, .btn-secondary .btn-spinner {
+            border: 2px solid rgba(99,102,241,0.25); border-top-color: #4338ca;
+        }
+        @keyframes btn-spin { to { transform: rotate(360deg); } }
         .modal .modal-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
         .modal .modal-title-row h2{margin-bottom:0;}
         .modal .lockout-msg{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;margin-bottom:14px;}
@@ -575,10 +593,13 @@
     <div class="controls">
         <div class="admin-only" style="display:flex; flex-wrap:wrap; gap:14px 20px; width:100%; margin-bottom:12px; align-items:center;">
             <div class="month-nav">
-                <button class="icon-btn" id="prevMonthBtn" title="Previous month">◀</button>
-                <button class="btn btn-outline" id="monthPickerBtn">📅 <span id="monthPickerLabel">—</span></button>
-                <button class="icon-btn" id="nextMonthBtn" title="Next month">▶</button>
-                <button class="btn btn-outline" id="goCurrentMonthBtn">This Month</button>
+                <button class="icon-btn" id="prevMonthBtn" title="Previous period">◀</button>
+                <button class="btn btn-outline" id="monthPickerBtn" title="Roster periods run 26th → 25th (payroll cycle)">
+                    <span class="month-btn-main">📅 <span id="monthPickerLabel">—</span></span>
+                    <span class="month-btn-range" id="monthPickerRange"></span>
+                </button>
+                <button class="icon-btn" id="nextMonthBtn" title="Next period">▶</button>
+                <button class="btn btn-outline" id="goCurrentMonthBtn" title="Jump to the period covering today">This Period</button>
 
                 <div class="month-picker-popup" id="monthPickerPopup">
                     <div class="month-picker-header">
@@ -587,6 +608,7 @@
                         <button class="icon-btn" id="pickerNextYear" title="Next year">▶</button>
                     </div>
                     <div class="month-picker-grid" id="monthPickerGrid"></div>
+                    <div class="month-picker-footnote">💰 26th – 25th payroll cycle</div>
                 </div>
             </div>
 
@@ -860,8 +882,31 @@ const MEMBERS = [
     "VINCENT KALIBBALA"
 ];
 
-let START_DATE = new Date(new Date().getFullYear(), new Date().getMonth(), 1); // 1st of current month
-let END_DATE   = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0); // last day of current month
+// ---- Payroll period helpers ----
+// Roster periods always run from the 26th of one month to the 25th of the next,
+// matching the payroll cycle. A "period" is identified by (year, monthIndex) —
+// the month containing its 25th (closing) day — e.g. period (2026, 0) = "January 2026"
+// runs 26 Dec 2025 → 25 Jan 2026.
+function getPeriodBounds(year, monthIndex) {
+    const start = new Date(year, monthIndex - 1, 26);
+    const end   = new Date(year, monthIndex, 25);
+    return { start, end };
+}
+// Which (year, monthIndex) period contains today, per the 26→25 cycle
+function getCurrentPeriodPointer() {
+    const today = new Date();
+    let year = today.getFullYear(), month = today.getMonth();
+    if (today.getDate() > 25) {
+        month += 1;
+        if (month > 11) { month = 0; year += 1; }
+    }
+    return { year, month };
+}
+
+const { year: DEFAULT_PERIOD_YEAR, month: DEFAULT_PERIOD_MONTH } = getCurrentPeriodPointer();
+const { start: DEFAULT_PERIOD_START, end: DEFAULT_PERIOD_END } = getPeriodBounds(DEFAULT_PERIOD_YEAR, DEFAULT_PERIOD_MONTH);
+let START_DATE = DEFAULT_PERIOD_START; // 26th of the previous month
+let END_DATE   = DEFAULT_PERIOD_END;   // 25th of the current/next month
 
 const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
@@ -882,8 +927,8 @@ let globalSiteEnd   = '17:00';
 // and logging back in as admin restores it. Supports custom ranges, not just
 // whole months. adminSelectedYear/Month are kept too, for the month-picker UI
 // and for backwards compatibility with older saved roster files.
-let adminSelectedYear  = new Date().getFullYear();
-let adminSelectedMonth = new Date().getMonth();
+let adminSelectedYear  = DEFAULT_PERIOD_YEAR;
+let adminSelectedMonth = DEFAULT_PERIOD_MONTH;
 let adminSelectedStartDate = formatDateKey(START_DATE);
 let adminSelectedEndDate   = formatDateKey(END_DATE);
 
@@ -917,6 +962,23 @@ function showToast(msg, type) {
     el.textContent = msg;
     container.appendChild(el);
     setTimeout(() => el.remove(), 2800);
+}
+
+// ---- Button loading state (used during GitHub push/pull so a slow connection
+// or a retry-on-conflict doesn't look like a frozen/unresponsive button) ----
+function setButtonLoading(btn, loadingText) {
+    if (!btn || btn.dataset.loading === '1') return;
+    btn.dataset.loading = '1';
+    btn.dataset.originalHtml = btn.innerHTML;
+    btn.innerHTML = `<span class="btn-spinner"></span>${loadingText}`;
+    btn.disabled = true;
+}
+function clearButtonLoading(btn) {
+    if (!btn || btn.dataset.loading !== '1') return;
+    btn.innerHTML = btn.dataset.originalHtml || btn.innerHTML;
+    delete btn.dataset.originalHtml;
+    delete btn.dataset.loading;
+    btn.disabled = false;
 }
 
 // ---- LocalStorage persistence ----
@@ -1077,47 +1139,80 @@ async function githubPush(silent) {
     githubPushInFlight = true;
     setGithubStatus('syncing', 'GitHub: syncing…');
     try {
-        const existing = await githubFetchFile();
-        const data = {
-            startDate: START_DATE.toISOString(),
-            endDate: END_DATE.toISOString(),
-            roster, cellTime, events, eventIdCounter,
-            globalSiteStart, globalSiteEnd,
-            adminSelectedYear, adminSelectedMonth,
-            adminSelectedStartDate, adminSelectedEndDate,
-            _syncedAt: new Date().toISOString()
-        };
-        const body = {
-            message: `Duty roster update — ${new Date().toLocaleString('en-GB')}`,
-            content: utf8ToBase64(JSON.stringify(data, null, 2)),
-            branch: githubConfig.branch
-        };
-        if (existing && existing.sha) body.sha = existing.sha;
-
-        const res = await fetch(githubApiUrl(), {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${githubToken}`,
-                'Accept': 'application/vnd.github+json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body)
-        });
-        if (!res.ok) {
-            const errBody = await res.json().catch(() => ({}));
-            if (res.status === 409 || /does not match/i.test(errBody.message || '')) {
-                throw new Error("Someone else just updated the roster on GitHub. Click 🐙 → Pull Now to get the latest version, then try again.");
-            }
-            throw new Error(errBody.message || `Push failed (${res.status})`);
-        }
+        await attemptGithubPush();
+        lastKnownUpdate = new Date().toISOString();
         updateGithubStatusUI();
+        updateGhHint();
         if (!silent) showToast('Pushed to GitHub', 'success');
     } catch (err) {
+        // One automatic retry on a sha conflict — common when auto-push and a manual
+        // Publish overlap on the same device, or another admin just published.
+        if (err && err.conflict) {
+            try {
+                await attemptGithubPush();
+                lastKnownUpdate = new Date().toISOString();
+                updateGithubStatusUI();
+                updateGhHint();
+                if (!silent) showToast('Pushed to GitHub', 'success');
+                githubPushInFlight = false;
+                return;
+            } catch (retryErr) {
+                console.error('GitHub push retry failed:', retryErr);
+                setGithubStatus('error', 'GitHub: push failed');
+                updateGhHint("Push conflict — click 🐙 → Pull Now, then try again.", true);
+                if (!silent) showToast(retryErr.message, 'error');
+                githubPushInFlight = false;
+                return;
+            }
+        }
         console.error('GitHub push error:', err);
         setGithubStatus('error', 'GitHub: push failed');
+        updateGhHint(`Push failed: ${err.message}`, true);
         if (!silent) showToast(`GitHub push failed: ${err.message}`, 'error');
     } finally {
         githubPushInFlight = false;
+    }
+}
+
+// Single push attempt. Throws a regular Error for normal failures, or an
+// Error with `.conflict = true` specifically for a sha mismatch (409) so
+// the caller above knows it's safe to auto-retry once.
+async function attemptGithubPush() {
+    const existing = await githubFetchFile();
+    const data = {
+        startDate: START_DATE.toISOString(),
+        endDate: END_DATE.toISOString(),
+        roster, cellTime, events, eventIdCounter,
+        globalSiteStart, globalSiteEnd,
+        adminSelectedYear, adminSelectedMonth,
+        adminSelectedStartDate, adminSelectedEndDate,
+        _syncedAt: new Date().toISOString()
+    };
+    const body = {
+        message: `Duty roster update — ${new Date().toLocaleString('en-GB')}`,
+        content: utf8ToBase64(JSON.stringify(data, null, 2)),
+        branch: githubConfig.branch
+    };
+    if (existing && existing.sha) body.sha = existing.sha;
+
+    const res = await fetch(githubApiUrl(), {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${githubToken}`,
+            'Accept': 'application/vnd.github+json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        const message = errBody.message || `Push failed (${res.status})`;
+        const isConflict = res.status === 409 || /does not match/i.test(message);
+        const err = new Error(isConflict
+            ? "Someone else just updated the roster on GitHub. Click 🐙 → Pull Now to get the latest version, then try again."
+            : message);
+        if (isConflict) err.conflict = true;
+        throw err;
     }
 }
 
@@ -1140,14 +1235,17 @@ async function githubPull() {
         const found = await pullRosterFromGithub();
         if (!found) {
             setGithubStatus('error', 'GitHub: no file yet');
+            updateGhHint('No file found in that repo/path yet — push first.', true);
             showToast('No file found in that repo/path yet — push first.', 'error');
             return;
         }
         updateGithubStatusUI();
+        updateGhHint();
         showToast('Pulled latest roster from GitHub', 'success');
     } catch (err) {
         console.error('GitHub pull error:', err);
         setGithubStatus('error', 'GitHub: pull failed');
+        updateGhHint(`Pull failed: ${err.message}`, true);
         showToast(`GitHub pull failed: ${err.message}`, 'error');
     }
 }
@@ -1264,7 +1362,11 @@ function updateHeaderDates() {
     document.getElementById('calendarStart').value = formatDateKey(START_DATE);
     document.getElementById('calendarEnd').value = formatDateKey(END_DATE);
     const label = document.getElementById('monthPickerLabel');
-    if (label) label.textContent = `${MONTH_NAMES[START_DATE.getMonth()]} ${START_DATE.getFullYear()}`;
+    if (label) label.textContent = `${MONTH_NAMES[adminSelectedMonth]} ${adminSelectedYear}`;
+    const rangeEl = document.getElementById('monthPickerRange');
+    if (rangeEl) {
+        rangeEl.textContent = `${START_DATE.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})} – ${END_DATE.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}`;
+    }
 }
 
 // ---- Off counts ----
@@ -1810,8 +1912,27 @@ function openGithubModal() {
     document.getElementById('ghPath').value   = githubConfig.path;
     document.getElementById('ghBranch').value = githubConfig.branch;
     document.getElementById('ghAutoSync').checked = githubConfig.autoSync;
-    document.getElementById('ghHint').textContent = '';
+    updateGhHint();
     githubModal.classList.add('active');
+}
+
+// Shows last-synced time + status inside the GitHub modal, persisting across opens.
+function updateGhHint(message, isError) {
+    const hint = document.getElementById('ghHint');
+    if (!hint) return;
+    if (message) {
+        hint.textContent = message;
+        hint.style.color = isError ? '#dc2626' : '#059669';
+        return;
+    }
+    if (lastKnownUpdate) {
+        const when = new Date(lastKnownUpdate).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+        hint.textContent = `Last synced: ${when}`;
+        hint.style.color = '';
+    } else {
+        hint.textContent = githubConfigured() ? 'Not synced yet — Push Now to publish the first version.' : '';
+        hint.style.color = '';
+    }
 }
 document.getElementById('closeGithubModal').addEventListener('click', () => githubModal.classList.remove('active'));
 githubModal.addEventListener('click', e => { if (e.target===githubModal) githubModal.classList.remove('active'); });
@@ -1836,23 +1957,25 @@ document.getElementById('ghSaveSettings').addEventListener('click', () => {
     showToast('GitHub sync settings saved', 'success');
 });
 
-document.getElementById('ghPushNow').addEventListener('click', async () => {
+document.getElementById('ghPushNow').addEventListener('click', async function() {
     // Use whatever is currently in the fields (in case user hasn't hit Save yet)
     githubConfig.owner  = document.getElementById('ghOwner').value.trim()  || githubConfig.owner;
     githubConfig.repo   = document.getElementById('ghRepo').value.trim()   || githubConfig.repo;
     githubConfig.path   = document.getElementById('ghPath').value.trim()  || githubConfig.path;
     githubConfig.branch = document.getElementById('ghBranch').value.trim() || githubConfig.branch;
     githubToken = document.getElementById('ghToken').value.trim() || githubToken;
-    await githubPush(false);
+    setButtonLoading(this, 'Pushing…');
+    try { await githubPush(false); } finally { clearButtonLoading(this); }
 });
-document.getElementById('ghPullNow').addEventListener('click', async () => {
+document.getElementById('ghPullNow').addEventListener('click', async function() {
     githubConfig.owner  = document.getElementById('ghOwner').value.trim()  || githubConfig.owner;
     githubConfig.repo   = document.getElementById('ghRepo').value.trim()   || githubConfig.repo;
     githubConfig.path   = document.getElementById('ghPath').value.trim()  || githubConfig.path;
     githubConfig.branch = document.getElementById('ghBranch').value.trim() || githubConfig.branch;
     githubToken = document.getElementById('ghToken').value.trim() || githubToken;
     if (!confirm('This will overwrite the roster currently shown with whatever is saved on GitHub. Continue?')) return;
-    await githubPull();
+    setButtonLoading(this, 'Pulling…');
+    try { await githubPull(); } finally { clearButtonLoading(this); }
 });
 document.getElementById('ghDisconnect').addEventListener('click', () => {
     if (!confirm('Disconnect GitHub sync and remove the saved token from this browser?')) return;
@@ -1863,12 +1986,16 @@ document.getElementById('ghDisconnect').addEventListener('click', () => {
 });
 
 // ---- View-only banner: "Load Published" button ----
-document.getElementById('loadPublishedBtn').addEventListener('click', () => loadPublishedRoster());
+document.getElementById('loadPublishedBtn').addEventListener('click', async function() {
+    setButtonLoading(this, 'Loading…');
+    try { await loadPublishedRoster(); } finally { clearButtonLoading(this); }
+});
 
 // ---- Admin toolbar: "Publish" button — pushes the current roster straight to GitHub ----
-document.getElementById('publishBtn').addEventListener('click', () => {
+document.getElementById('publishBtn').addEventListener('click', async function() {
     if (!githubConfigured()) { showToast('Set up GitHub sync first (🐙 button)', 'error'); return; }
-    githubPush(false);
+    setButtonLoading(this, 'Publishing…');
+    try { await githubPush(false); } finally { clearButtonLoading(this); }
 });
 
 // ---- Theme toggle ----
@@ -1952,28 +2079,37 @@ document.getElementById('loadDataInput').addEventListener('change', function(e) 
 //  CONTROLS
 // ============================================================
 
-// ---- Month Navigator ----
+// ---- Period Navigator (26th → 25th payroll cycle) ----
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-let pickerViewYear = START_DATE.getFullYear();
+let pickerViewYear = adminSelectedYear;
 
 function setMonth(year, monthIndex) {
-    START_DATE = new Date(year, monthIndex, 1);
-    END_DATE   = new Date(year, monthIndex + 1, 0); // last day of that month
+    // Normalize in case the caller passed monthIndex = -1 or 12 (prev/next wrap-around)
+    const norm = new Date(year, monthIndex, 1);
+    year = norm.getFullYear();
+    monthIndex = norm.getMonth();
+
+    const { start, end } = getPeriodBounds(year, monthIndex);
+    START_DATE = start;
+    END_DATE   = end;
     adminSelectedYear  = year;
     adminSelectedMonth = monthIndex;
     adminSelectedStartDate = formatDateKey(START_DATE);
     adminSelectedEndDate   = formatDateKey(END_DATE);
     render();
-    showToast(`Switched to ${MONTH_NAMES[monthIndex]} ${year}`, '');
+    const rangeLabel = `${start.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})} – ${end.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}`;
+    showToast(`Switched to ${MONTH_NAMES[monthIndex]} ${year} (${rangeLabel})`, '');
 }
 
 function renderMonthPickerGrid() {
     const grid = document.getElementById('monthPickerGrid');
-    const today = new Date();
+    const current = getCurrentPeriodPointer();
     grid.innerHTML = MONTH_NAMES.map((m, i) => {
-        const isSelected = (i === START_DATE.getMonth() && pickerViewYear === START_DATE.getFullYear());
-        const isCurrent  = (i === today.getMonth() && pickerViewYear === today.getFullYear());
-        return `<button type="button" class="${isSelected ? 'active-month' : ''} ${isCurrent ? 'current-month-marker' : ''}" data-month="${i}" title="${isCurrent ? 'Current month' : ''}">${m.slice(0,3)}</button>`;
+        const isSelected = (i === adminSelectedMonth && pickerViewYear === adminSelectedYear);
+        const isCurrent  = (i === current.month && pickerViewYear === current.year);
+        const { start, end } = getPeriodBounds(pickerViewYear, i);
+        const rangeLabel = `${start.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})} – ${end.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}`;
+        return `<button type="button" class="${isSelected ? 'active-month' : ''} ${isCurrent ? 'current-month-marker' : ''}" data-month="${i}" title="${rangeLabel}${isCurrent ? ' • Current period' : ''}">${m.slice(0,3)}</button>`;
     }).join('');
     document.getElementById('pickerYearLabel').textContent = pickerViewYear;
     grid.querySelectorAll('button').forEach(btn => {
@@ -1987,7 +2123,7 @@ function renderMonthPickerGrid() {
 
 document.getElementById('monthPickerBtn').addEventListener('click', (e) => {
     e.stopPropagation();
-    pickerViewYear = START_DATE.getFullYear();
+    pickerViewYear = adminSelectedYear;
     renderMonthPickerGrid();
     document.getElementById('monthPickerPopup').classList.toggle('active');
 });
@@ -2009,16 +2145,14 @@ document.addEventListener('click', (e) => {
 });
 
 document.getElementById('prevMonthBtn').addEventListener('click', () => {
-    const d = new Date(START_DATE.getFullYear(), START_DATE.getMonth() - 1, 1);
-    setMonth(d.getFullYear(), d.getMonth());
+    setMonth(adminSelectedYear, adminSelectedMonth - 1);
 });
 document.getElementById('nextMonthBtn').addEventListener('click', () => {
-    const d = new Date(START_DATE.getFullYear(), START_DATE.getMonth() + 1, 1);
-    setMonth(d.getFullYear(), d.getMonth());
+    setMonth(adminSelectedYear, adminSelectedMonth + 1);
 });
 document.getElementById('goCurrentMonthBtn').addEventListener('click', () => {
-    const today = new Date();
-    setMonth(today.getFullYear(), today.getMonth());
+    const { year, month } = getCurrentPeriodPointer();
+    setMonth(year, month);
 });
 document.getElementById('toggleCustomRangeBtn').addEventListener('click', () => {
     const row = document.getElementById('customRangeRow');
@@ -2026,9 +2160,10 @@ document.getElementById('toggleCustomRangeBtn').addEventListener('click', () => 
 });
 
 function getPeriodFileLabel() {
-    const isFullMonth = START_DATE.getDate() === 1 &&
-        END_DATE.getTime() === new Date(START_DATE.getFullYear(), START_DATE.getMonth() + 1, 0).getTime();
-    if (isFullMonth) return `${MONTH_NAMES[START_DATE.getMonth()]}_${START_DATE.getFullYear()}`;
+    const { start: stdStart, end: stdEnd } = getPeriodBounds(adminSelectedYear, adminSelectedMonth);
+    const isFullMonth = formatDateKey(START_DATE) === formatDateKey(stdStart) &&
+        formatDateKey(END_DATE) === formatDateKey(stdEnd);
+    if (isFullMonth) return `${MONTH_NAMES[adminSelectedMonth]}_${adminSelectedYear}`;
     return `${formatDateKey(START_DATE)}_to_${formatDateKey(END_DATE)}`;
 }
 
